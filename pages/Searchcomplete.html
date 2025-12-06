@@ -1,58 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Student Information Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/trels.css">
     <style>
-        #profilePicture {
-            margin-bottom: -15px;
-            margin-top: 26px;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: none;
+        /* Force top bar to always show when not hidden */
+        .welcome-top-bar:not(.hidden) {
+            display: flex !important;
         }
     </style>
 </head>
+
 <body>
+    <!-- Welcome Top Bar with Profile Picture and Email (STARTS VISIBLE FOR TESTING) -->
+    <div id="welcomeSection" class="welcome-top-bar">
+        <img id="profilePicture" alt="Profile Picture"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%2300d9ff'/%3E%3C/svg%3E">
+        <div id="aliceMessage">Welcome, <span id="jamesDisplay">User</span>!</div>
+    </div>
+
     <div id="johnSection" class="susan-container">
         <h1>Sign in with Google</h1>
         <button class="lucas-button" id="googleSignInBtn">Sign in with Google</button>
     </div>
-    <div id = "be">
-    <br><br><br><br>
-    <div id="loader" class="loader">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-      </div>
+
+    <div id="be">
+        <br><br><br><br>
+        <div id="loader" class="loader">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
     </div>
-    <div id="aliceMessage" class="hidden">Welcome, <span id="jamesDisplay"></span>!</div>
-    <img id="profilePicture" alt="Profile Picture">
+
     <div id="hide" class="hide form-container">
-        <center><div class="search-container">
-            <h2>Information Search</h2>
-            <select id="searchColumn">
-                <option value="3" selected>Name</option>
-                <option value="2">Roll Number</option>
-                <option value="5">Route no</option>
-            </select>
-            <input type="text" id="nameInput" placeholder="Enter name or part of name">
-            <button id="che">Search</button>
-        </div></center>
+        <center>
+            <div class="search-container">
+                <h2>Information Search</h2>
+                <div id="filtersContainer"></div>
+                <button id="addFilterBtn" class="add-filter-btn">+ Add Filter</button>
+                <button id="che">Search</button>
+            </div>
+        </center>
         <div class="results-container" id="resultsContainer"></div>
     </div>
+
     <div>
-        <div id = "loa" class="loader" style="display: none;">
+        <div id="loa" class="loader" style="display: none;">
             <div class="dot"></div>
             <div class="dot"></div>
             <div class="dot"></div>
-          </div>
-    <div id="imageGallery">
-        
-    </div></div>
+        </div>
+        <div id="imageGallery"></div>
+    </div>
+
     <script src="../scripts/bsdedd.js"></script>
-    <script src = "../scripts/asdeddd.js" type="module"></script>
+    <script src="../scripts/asdeddd.js" type="module"></script>
+
 </html>
