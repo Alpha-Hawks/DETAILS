@@ -235,14 +235,30 @@ function appendAdditionalLinks(container, rollNumber) {
                 <div style="margin-bottom:6px;"><strong>College:</strong> MLRITM</div>
                 
                 <!-- Address Details -->
-                <div style="background:#181818; border:1px solid #333; border-radius:6px; padding:8px; margin-top:8px;">
-                    <div style="font-weight:600; color:#00d9ff; font-size:12px; margin-bottom:4px;">📍 Address & Location</div>
-                    <div style="font-size:12px; margin-bottom:2px;"><strong>Home:</strong> ${details.address ? (details.address.line1 + ', ' + details.address.city + ', ' + details.address.district + ', ' + details.address.state + ' - ' + details.address.pincode) : 'Residence'}</div>
-                    <div style="font-size:12px; margin-bottom:2px;"><strong>Campus:</strong> MLRITM, Dundigal, Hyderabad - 500043</div>
-                    ${details.father_phone ? `<div style="font-size:12px; margin-bottom:2px;"><strong>Father Contact:</strong> <a href="tel:${details.father_phone}" style="color:#64b5f6;">${details.father_phone}</a></div>` : ''}
-                    <div style="margin-top:4px;">
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((details.address ? details.address.line1 + ', ' + details.address.city : 'Dundigal') + ', Hyderabad Telangana')}" target="_blank" style="color:#00d9ff; font-size:11px; text-decoration:none;">🗺️ View Location on Map</a>
+                <div style="background:#181818; border:1px solid #333; border-radius:6px; padding:10px; margin-top:8px;">
+                    <div style="font-weight:600; color:#00d9ff; font-size:12px; margin-bottom:6px;">📍 Address & Location</div>
+                    ${details.address && details.address.hasAddress ? `
+                        <div style="font-size:12px; margin-bottom:4px; line-height:1.4;">
+                            <strong style="color:#46d160;">🏠 Residential Address:</strong> 
+                            <span>${details.address.formatted}</span>
+                            ${details.address.isVerified ? '<span style="background:#238636; color:#fff; font-size:10px; padding:1px 5px; border-radius:3px; margin-left:4px;">VERIFIED</span>' : ''}
+                        </div>
+                        <div style="margin-bottom:6px;">
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.address.formatted)}" target="_blank" style="color:#64b5f6; font-size:11px; text-decoration:none;">🗺️ View Home on Google Maps</a>
+                        </div>
+                    ` : `
+                        <div style="font-size:12px; margin-bottom:4px; color:#8b949e;">
+                            <strong>🏠 Residential Address:</strong> 
+                            <span style="font-style:italic; color:#e3b341;">Not synced from Anvaya ERP</span>
+                        </div>
+                        <div style="font-size:11px; margin-bottom:6px; color:#8b949e;">
+                            <a href="https://anvaya.mlritm.ac.in/App/StudentProfile" target="_blank" style="color:#64b5f6; text-decoration:none;">🔗 Open Anvaya ERP Profile</a>
+                        </div>
+                    `}
+                    <div style="font-size:12px; margin-bottom:2px; color:#8b949e; border-top:1px solid #2a2a2a; padding-top:4px;">
+                        <strong style="color:#aaa;">🏛️ College Campus:</strong> MLRITM, Dundigal, Hyderabad - 500043
                     </div>
+                    ${details.father_phone ? `<div style="font-size:12px; margin-top:4px;"><strong>Father Contact:</strong> <a href="tel:${details.father_phone}" style="color:#64b5f6; text-decoration:none;">${details.father_phone}</a></div>` : ''}
                 </div>
 
                 <div style="margin-top:8px; display:flex; gap:8px;">
