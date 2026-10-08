@@ -439,7 +439,7 @@
         <div id="tab-single" class="tab-content active">
             <h2 style="font-size: 18px; margin-bottom: 12px; color: #58a6ff;">Search Student by Roll Number</h2>
             <div style="display: flex; gap: 12px; max-width: 500px;">
-                <input type="text" id="singleRollInput" class="form-control" placeholder="e.g. 237Y1A1270" value="237Y1A1270">
+                <input type="text" id="singleRollInput" class="form-control" placeholder="" value="" onkeydown="if(event.key === 'Enter') searchSingleStudent()">
                 <button class="btn-primary" onclick="searchSingleStudent()">Search</button>
             </div>
             <div id="singleResultContainer"></div>
@@ -921,9 +921,6 @@
                 closeModal();
             }
         };
-
-        // Run default search on load
-        window.addEventListener('DOMContentLoaded', searchSingleStudent);
     </script>
 </body>
 </html>
