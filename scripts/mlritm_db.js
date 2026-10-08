@@ -95,3 +95,162 @@ window.saveStudentAddress = function(roll, addressObj) {
         return false;
     }
 };
+
+// ==========================================
+// MLRITM PHONE & INSTAGRAM SEARCH EXTENSIONS
+// ==========================================
+
+window._MLRITM_PHONE_CACHE = null;
+
+window.getPhoneIndex = function() {
+    if (window._MLRITM_PHONE_CACHE) return window._MLRITM_PHONE_CACHE;
+    const cache = {};
+    if (typeof window.MLRITM_STUDENTS === 'object' && window.MLRITM_STUDENTS !== null) {
+        for (const [roll, data] of Object.entries(window.MLRITM_STUDENTS)) {
+            if (data.phone) {
+                const clean = String(data.phone).replace(/\D/g, '').slice(-10);
+                if (clean.length === 10) cache[clean] = roll;
+            }
+            if (data.father_phone) {
+                const cleanF = String(data.father_phone).replace(/\D/g, '').slice(-10);
+                if (cleanF.length === 10 && !cache[cleanF]) cache[cleanF] = roll;
+            }
+        }
+    }
+    window._MLRITM_PHONE_CACHE = cache;
+    return cache;
+};
+
+// Verified student Instagram profiles
+window.KNOWN_INSTAGRAM_STUDENTS = {
+    '237Y1A1270': {
+        username: 'dnshnetha',
+        handle: '@dnshnetha',
+        url: 'https://www.instagram.com/dnshnetha/',
+        stats: '203 Followers, 225 Following, 0 Posts',
+        bio: 'COOL〰️',
+        profilePic: 'https://instagram.fhyd1-7.fna.fbcdn.net/v/t51.82787-19/740989501_18086079215432353_433429027237501735_n.jpg?stp=dst-jpg_s100x100_tt6&_nc_cat=110&_nc_map=urlgen_bucketless&ccb=7-5&_nc_sid=bf7eb4&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy4xMDgwLkMzIn0%3D&_nc_ohc=8ixvYvH0t5IQ7kNvwF6Q9AC&_nc_oc=AdqmCawEm5OrS3JCHlcsr2MGRZkIWWrlqz31QQq0M0dqsmFD4dvEcYI47JVY8zBQrdjDytXS1kOgB8afTWUSwZaF&_nc_zt=24&_nc_ht=instagram.fhyd1-7.fna&_nc_gid=c5Cxikz6_BMAwPPBbohU2A&_nc_ss=7b6a8&oh=00_AQMqT-nZ_wZNjZODoMybNy-fV8yvfIE4dRVAeBaQUB9cQw&oe=6ACDD679',
+        isVerified: true
+    }
+};
+
+window.getStudentByPhone = function(queryPhone) {
+    if (!queryPhone) return null;
+    const cleanPhone = String(queryPhone).replace(/\D/g, '').slice(-10);
+    if (!cleanPhone || cleanPhone.length !== 10) return null;
+    const index = window.getPhoneIndex();
+    const roll = index[cleanPhone];
+    if (roll && window.MLRITM_STUDENTS[roll]) {
+        return {
+            rollNumber: roll,
+            matchedPhone: cleanPhone,
+            student: window.MLRITM_STUDENTS[roll],
+            instagram: window.getStudentInstagram(roll)
+        };
+    }
+    return null;
+};
+
+window.getStudentByInstagram = function(queryHandle) {
+    if (!queryHandle) return null;
+    const cleanHandle = String(queryHandle).replace(/^@/, '').trim().toLowerCase();
+    if (!cleanHandle) return null;
+
+    try {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('mlritm_ig_')) {
+                const roll = key.replace('mlritm_ig_', '');
+                const data = JSON.parse(localStorage.getItem(key));
+                if (data && data.username && data.username.toLowerCase() === cleanHandle) {
+                    return { rollNumber: roll, student: window.MLRITM_STUDENTS[roll] || null, instagram: data };
+                }
+            }
+        }
+    } catch(e) {}
+
+    for (const [roll, data] of Object.entries(window.KNOWN_INSTAGRAM_STUDENTS)) {
+        if (data.username && data.username.toLowerCase() === cleanHandle) {
+            return { rollNumber: roll, student: window.MLRITM_STUDENTS[roll] || null, instagram: data };
+        }
+    }
+
+    return null;
+};
+
+window.getStudentInstagram = function(roll) {
+    if (!roll) return null;
+    const cleanRoll = String(roll).trim().toUpperCase();
+    try {
+        const stored = localStorage.getItem('mlritm_ig_' + cleanRoll);
+        if (stored) return JSON.parse(stored);
+    } catch(e) {}
+
+    if (window.KNOWN_INSTAGRAM_STUDENTS[cleanRoll]) {
+        return window.KNOWN_INSTAGRAM_STUDENTS[cleanRoll];
+    }
+    return null;
+};
+
+window.saveStudentInstagram = function(roll, igObj) {
+    if (!roll) return false;
+    const cleanRoll = String(roll).trim().toUpperCase();
+    try {
+        igObj.linkedRoll = cleanRoll;
+        if (igObj.username) {
+            igObj.username = igObj.username.replace(/^@/, '').trim();
+            igObj.handle = '@' + igObj.username;
+            if (!igObj.url) igObj.url = 'https://www.instagram.com/' + igObj.username + '/';
+        }
+        localStorage.setItem('mlritm_ig_' + cleanRoll, JSON.stringify(igObj));
+        return true;
+    } catch(e) {
+        console.error('Error saving Instagram data:', e);
+        return false;
+    }
+};
+
+window.parseInstagramCode = function(code) {
+    if (!code) return null;
+
+    let username = null;
+    let url = null;
+    let stats = null;
+    let bio = null;
+    let profilePic = null;
+
+    const uMatch1 = code.match(/instagram:\/\/user\?username=([a-zA-Z0-9._]+)/i);
+    const uMatch2 = code.match(/<link\s+rel=["']alternate["']\s+href=["']https:\/\/www\.instagram\.com\/([a-zA-Z0-9._]+)\//i);
+    const uMatch3 = code.match(/@([a-zA-Z0-9._]+)\s+on\s+Instagram/i);
+    const uMatch4 = code.match(/<title>\s*(?:\([&#0-9;]*@)?([a-zA-Z0-9._]+)\)?\s*[•\-]/i);
+    const uMatch5 = code.match(/"username"\s*:\s*"([a-zA-Z0-9._]+)"/i);
+    const uMatch6 = code.match(/instagram\.com\/([a-zA-Z0-9._]+)/i);
+
+    username = (uMatch1 && uMatch1[1]) || (uMatch2 && uMatch2[1]) || (uMatch3 && uMatch3[1]) || (uMatch4 && uMatch4[1]) || (uMatch5 && uMatch5[1]) || (uMatch6 && uMatch6[1]) || null;
+
+    const statsMatch = code.match(/([0-9KkMm,.]+\s+Followers,\s+[0-9KkMm,.]+\s+Following,\s+[0-9KkMm,.]+\s+Posts)/i);
+    if (statsMatch) stats = statsMatch[1];
+
+    const bioMatch = code.match(/on\s+Instagram:\s*(?:&quot;|"|“)(.*?)(?:&quot;|"|”)/i);
+    if (bioMatch) bio = bioMatch[1];
+
+    const urlMatch = code.match(/<meta\s+property=["']og:url["']\s+content=["'](https:\/\/www\.instagram\.com\/[^"']+)["']/i);
+    url = urlMatch ? urlMatch[1] : (username ? 'https://www.instagram.com/' + username + '/' : null);
+
+    const imgMatch = code.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
+    if (imgMatch) {
+        profilePic = imgMatch[1].replace(/&amp;/g, '&');
+    }
+
+    if (!username && !url) return null;
+
+    return {
+        username,
+        handle: username ? '@' + username : null,
+        url,
+        stats,
+        bio,
+        profilePic
+    };
+};
+

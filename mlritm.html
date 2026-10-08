@@ -432,12 +432,13 @@
             <button class="tab-btn active" onclick="switchTab('single')">Single Student Search</button>
             <button class="tab-btn" onclick="switchTab('range')">Batch Range Generator</button>
             <button class="tab-btn" onclick="switchTab('branch')">Quick Branch Browser</button>
+            <button class="tab-btn" onclick="switchTab('instagram')">📸 Instagram & Mobile Finder</button>
             <button class="tab-btn" onclick="switchTab('html')">Portal HTML Extractor</button>
         </div>
 
         <!-- Tab 1: Single Student Search -->
         <div id="tab-single" class="tab-content active">
-            <h2 style="font-size: 18px; margin-bottom: 12px; color: #58a6ff;">Search Student by Roll Number</h2>
+            <h2 style="font-size: 18px; margin-bottom: 12px; color: #58a6ff;">Search Student by Roll Number or Mobile Number</h2>
             <div style="display: flex; gap: 12px; max-width: 500px;">
                 <input type="text" id="singleRollInput" class="form-control" placeholder="" value="" onkeydown="if(event.key === 'Enter') searchSingleStudent()">
                 <button class="btn-primary" onclick="searchSingleStudent()">Search</button>
@@ -516,6 +517,53 @@
             <div id="htmlExtractResult"></div>
         </div>
 
+        <!-- Tab 5: Instagram & Mobile Finder -->
+        <div id="tab-instagram" class="tab-content">
+            <h2 style="font-size: 18px; margin-bottom: 8px; color: #ff7b72;">📸 Search Student Instagram ID by Mobile Number</h2>
+            <p style="font-size: 13px; color: #8b949e; margin-bottom: 16px;">
+                Lookup any MLRITM student's profile, roll number, and Instagram account using their 10-digit mobile number, or paste Instagram profile HTML to extract & link profiles.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                <!-- Box 1: Search by Mobile Number -->
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
+                    <h3 style="font-size: 15px; color: #58a6ff; margin-bottom: 6px;">📱 Search by Mobile Number</h3>
+                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Enter student or parent 10-digit phone number:</p>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="mobileSearchInput" class="form-control" placeholder="e.g. 9573458794" maxlength="15" onkeydown="if(event.key === 'Enter') searchByMobile()">
+                        <button class="btn-primary" onclick="searchByMobile()" style="white-space: nowrap;">Search Phone</button>
+                    </div>
+                </div>
+
+                <!-- Box 2: Search by Instagram Handle -->
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
+                    <h3 style="font-size: 15px; color: #f77737; margin-bottom: 6px;">📸 Search by Instagram ID</h3>
+                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Enter Instagram username or @handle:</p>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="igHandleSearchInput" class="form-control" placeholder="e.g. @dnshnetha or dnshnetha" onkeydown="if(event.key === 'Enter') searchByInstagramHandle()">
+                        <button class="btn-primary" onclick="searchByInstagramHandle()" style="white-space: nowrap; background: linear-gradient(45deg, #f09433, #dc2743);">Find Student</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Result Container -->
+            <div id="igSearchResultContainer" style="margin-bottom: 24px;"></div>
+
+            <!-- Box 3: Extract from Instagram HTML -->
+            <div style="background: #161b22; border: 1px solid #e1306c44; border-radius: 8px; padding: 16px;">
+                <h3 style="font-size: 15px; color: #ff7b72; margin-bottom: 6px;">🧩 Extract Details from Instagram Profile HTML Code</h3>
+                <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">
+                    Paste Instagram profile HTML code below (with title, meta tags, or page source), and click extract to read the username, followers, bio, and link to a student's mobile number:
+                </p>
+                <textarea id="igHtmlInput" class="form-control" style="min-height: 120px;" placeholder="Paste Instagram profile HTML here (e.g. <!DOCTYPE html><html ...>)..."></textarea>
+                <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-primary" onclick="extractFromInstagramHtml()" style="background: linear-gradient(45deg, #f09433, #dc2743);">Extract & Link Profile</button>
+                    <button class="btn-card" onclick="loadSampleInstagramHtml()">Paste Sample Instagram Code</button>
+                </div>
+                <div id="igExtractResultContainer"></div>
+            </div>
+        </div>
+
         <!-- Gallery / Results Section -->
         <div class="results-section">
             <div id="gallerySpinner" class="spinner"></div>
@@ -576,6 +624,7 @@
             const photoUrl = `https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${cleanRoll}.jpg`;
             const name = (db && db.name) ? db.name : (knownStudents[cleanRoll]?.name || null);
             const address = (typeof window.getStudentAddress === 'function') ? window.getStudentAddress(cleanRoll) : null;
+            const instagram = (typeof window.getStudentInstagram === 'function') ? window.getStudentInstagram(cleanRoll) : null;
 
             return {
                 rollNumber: cleanRoll,
@@ -592,7 +641,8 @@
                 course: cleanRoll.substring(4, 6) === '1A' ? 'B.Tech (Regular)' : 'B.Tech (Lateral Entry)',
                 college: 'MLRITM - Marri Laxman Reddy Institute of Technology and Management',
                 photoUrl,
-                address
+                address,
+                instagram
             };
         }
 
@@ -600,8 +650,95 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            event.target.classList.add('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => (b.getAttribute('onclick') || '').includes(`'${tabName}'`));
+            if (targetBtn) targetBtn.classList.add('active');
+
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            if (targetTab) targetTab.classList.add('active');
+        }
+
+        function renderInstagramBlock(info) {
+            const ig = info.instagram;
+            const hasIg = ig && (ig.username || ig.handle);
+            const igHandle = hasIg ? (ig.handle || `@${ig.username}`) : null;
+            const igUrl = hasIg ? (ig.url || `https://www.instagram.com/${ig.username}/`) : null;
+
+            return `
+                <div style="background: #161b22; border: 1px solid ${hasIg ? '#e1306c66' : '#30363d'}; border-radius: 8px; padding: 12px; margin-top: 12px; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <strong style="color: #ff7b72; font-size: 13px;">📸 Instagram ID</strong>
+                            ${hasIg ? '<span style="background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 4px;">LINKED</span>' : '<span style="background: #21262d; color: #8b949e; font-size: 10px; padding: 1px 6px; border-radius: 4px;">NOT LINKED</span>'}
+                            ${ig && ig.isVerified ? '<span style="background: #238636; color: #fff; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 4px;">VERIFIED</span>' : ''}
+                        </div>
+                        <button onclick="promptEditInstagram('${info.rollNumber}')" style="background: #21262d; border: 1px solid #30363d; color: #ff7b72; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer;">✏️ Link/Edit ID</button>
+                    </div>
+
+                    ${hasIg ? `
+                        <div style="display: flex; gap: 12px; align-items: center; margin-top: 6px;">
+                            ${ig.profilePic ? `<img src="${ig.profilePic}" style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid #e1306c; object-fit: cover;" onerror="this.style.display='none';">` : ''}
+                            <div>
+                                <div style="font-size: 15px; font-weight: bold;">
+                                    <a href="${igUrl}" target="_blank" style="color: #ff7b72; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                                        ${igHandle} ↗
+                                    </a>
+                                </div>
+                                ${ig.bio ? `<div style="font-size: 12px; color: #c9d1d9; margin-top: 2px;">💬 "${ig.bio}"</div>` : ''}
+                                ${ig.stats ? `<div style="font-size: 11px; color: #8b949e; margin-top: 2px;">📊 ${ig.stats}</div>` : ''}
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="${igUrl}" target="_blank" class="btn-card" style="background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; padding: 5px 12px; border: none; text-decoration: none; border-radius: 6px; font-size: 12px;">Open Profile</a>
+                            <a href="https://ig.me/m/${ig.username}" target="_blank" class="btn-card" style="padding: 5px 12px; background: #21262d; border: 1px solid #30363d; color: #58a6ff; text-decoration: none; border-radius: 6px; font-size: 12px;">Direct Message</a>
+                            <button class="btn-card" onclick="navigator.clipboard.writeText('${igHandle}'); alert('Instagram handle copied: ${igHandle}');" style="padding: 5px 12px; font-size: 12px;">Copy Handle</button>
+                        </div>
+                    ` : `
+                        <div style="font-size: 12px; color: #8b949e; margin-bottom: 8px;">
+                            No Instagram account directly linked yet for mobile <strong style="color: #58a6ff;">${info.phone || 'N/A'}</strong>.
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(info.name || info.rollNumber)}" target="_blank" class="btn-card" style="padding: 5px 10px; background: #21262d; border: 1px solid #e1306c55; color: #ff7b72; text-decoration: none; border-radius: 6px; font-size: 12px;">🔍 Search Name on Instagram</a>
+                            <a href="https://www.google.com/search?q=site:instagram.com+${encodeURIComponent((info.name || '') + ' ' + (info.phone || ''))}" target="_blank" class="btn-card" style="padding: 5px 10px; background: #21262d; border: 1px solid #30363d; color: #79c0ff; text-decoration: none; border-radius: 6px; font-size: 12px;">🌐 Google Instagram Search</a>
+                            <button onclick="promptEditInstagram('${info.rollNumber}')" class="btn-card" style="padding: 5px 10px; background: #238636; border: none; color: #fff; border-radius: 6px; font-size: 12px;">➕ Link Instagram</button>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function promptEditInstagram(roll) {
+            const current = (typeof window.getStudentInstagram === 'function') ? window.getStudentInstagram(roll) : {};
+            const handle = prompt("Enter Instagram Username or Handle (e.g. dnshnetha or @dnshnetha):", current?.username || current?.handle || "");
+            if (handle === null) return;
+            const clean = handle.replace(/^@/, '').trim();
+            if (!clean) {
+                if (confirm("Remove linked Instagram account for " + roll + "?")) {
+                    localStorage.removeItem('mlritm_ig_' + roll.toUpperCase());
+                    searchSingleStudent();
+                    if (document.getElementById('detailModal').classList.contains('active')) {
+                        openModalForRoll(roll);
+                    }
+                }
+                return;
+            }
+            const bio = prompt("Enter Instagram Bio / Description (optional):", current?.bio || "");
+            const stats = prompt("Enter Instagram Stats (e.g. 200 Followers) (optional):", current?.stats || "");
+
+            if (typeof window.saveStudentInstagram === 'function') {
+                window.saveStudentInstagram(roll, {
+                    username: clean,
+                    handle: '@' + clean,
+                    url: 'https://www.instagram.com/' + clean + '/',
+                    bio: bio || '',
+                    stats: stats || '',
+                    isVerified: true
+                });
+                alert("Instagram profile saved for " + roll + "!");
+                searchSingleStudent();
+                if (document.getElementById('detailModal').classList.contains('active')) {
+                    openModalForRoll(roll);
+                }
+            }
         }
 
         function renderAddressBlock(info) {
@@ -650,15 +787,32 @@
             `;
         }
 
-        // Search single student
+        // Search single student (Supports Roll Number, Mobile Number, or Instagram Handle)
         function searchSingleStudent() {
-            const rollInput = document.getElementById('singleRollInput').value.trim().toUpperCase();
-            if (!rollInput) {
-                alert('Please enter a roll number.');
+            const rawInput = document.getElementById('singleRollInput').value.trim();
+            if (!rawInput) {
+                alert('Please enter a roll number, mobile number, or Instagram ID.');
                 return;
             }
 
-            const info = decodeRoll(rollInput);
+            let roll = rawInput.toUpperCase();
+            const cleanDigits = rawInput.replace(/\D/g, '');
+
+            // 1. Check if user entered a 10-digit mobile number
+            if (cleanDigits.length >= 10 && typeof window.getStudentByPhone === 'function') {
+                const phoneMatch = window.getStudentByPhone(cleanDigits);
+                if (phoneMatch) {
+                    roll = phoneMatch.rollNumber;
+                }
+            } else if ((rawInput.startsWith('@') || !rawInput.includes('7Y')) && typeof window.getStudentByInstagram === 'function') {
+                // 2. Check if user entered an Instagram handle
+                const igMatch = window.getStudentByInstagram(rawInput);
+                if (igMatch) {
+                    roll = igMatch.rollNumber;
+                }
+            }
+
+            const info = decodeRoll(roll);
             const container = document.getElementById('singleResultContainer');
             container.innerHTML = `
                 <div class="profile-hero">
@@ -668,19 +822,21 @@
                     <div class="hero-details">
                         <h3>${info.rollNumber}</h3>
                         ${info.name ? `<div class="name">${info.name}</div>` : ''}
-                        ${info.phone ? `<p><strong>Mobile:</strong> <a href="tel:${info.phone}" style="color:#58a6ff; text-decoration:none;">${info.phone}</a></p>` : ''}
-                        ${info.father ? `<p><strong>Father Name:</strong> ${info.father}</p>` : ''}
+                        ${info.phone ? `<p><strong>Mobile:</strong> <a href="tel:${info.phone}" style="color:#58a6ff; text-decoration:none;">${info.phone}</a> <span style="background: #238636; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-left:4px;">VERIFIED PHONE</span></p>` : ''}
+                        ${info.father ? `<p><strong>Father Name:</strong> ${info.father} ${info.father_phone ? '(' + info.father_phone + ')' : ''}</p>` : ''}
                         ${info.dob ? `<p><strong>DOB:</strong> ${info.dob} ${info.gender ? '(' + info.gender + ')' : ''}</p>` : ''}
                         <p><strong>Branch:</strong> ${info.branch}</p>
                         <p><strong>Batch:</strong> ${info.batch}</p>
                         <p><strong>Email:</strong> <a href="mailto:${info.email}" style="color:#58a6ff;">${info.email}</a></p>
                         <p><strong>College:</strong> ${info.college}</p>
                         
+                        ${renderInstagramBlock(info)}
                         ${renderAddressBlock(info)}
 
-                        <div style="margin-top: 14px; display: flex; gap: 8px;">
+                        <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
                             <a href="${info.photoUrl}" target="_blank" class="btn-card primary" style="padding: 7px 14px;">Open Full Photo</a>
                             <button class="btn-card" onclick="navigator.clipboard.writeText('${info.email}'); alert('Email copied!');">Copy Email</button>
+                            ${info.phone ? `<a href="tel:${info.phone}" class="btn-card" style="padding: 7px 14px; text-decoration:none;">Call Student</a>` : ''}
                         </div>
                     </div>
                 </div>
@@ -865,11 +1021,13 @@
                         <p style="margin-bottom: 6px;"><strong>Course:</strong> ${info.course}</p>
                         <p style="margin-bottom: 6px;"><strong>Email:</strong> <a href="mailto:${info.email}" style="color: #58a6ff;">${info.email}</a></p>
 
+                        ${renderInstagramBlock(info)}
                         ${renderAddressBlock(info)}
                     </div>
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <a href="${info.photoUrl}" target="_blank" class="btn-card primary" style="padding: 8px 14px; font-size: 13px;">View Full Image</a>
                         <button class="btn-card" onclick="navigator.clipboard.writeText('${info.email}'); alert('Email copied!');" style="padding: 8px 14px; font-size: 13px;">Copy Email</button>
+                        ${info.phone ? `<a href="tel:${info.phone}" class="btn-card" style="padding: 8px 14px; font-size: 13px; text-decoration:none;">Call Student</a>` : ''}
                     </div>
                 </div>
             `;
@@ -921,6 +1079,258 @@
                 closeModal();
             }
         };
+
+        // ==========================================
+        // INSTAGRAM & MOBILE SEARCH ACTIONS
+        // ==========================================
+
+        function searchByMobile() {
+            const phoneInput = document.getElementById('mobileSearchInput').value.trim();
+            const cleanPhone = phoneInput.replace(/\D/g, '').slice(-10);
+            if (!cleanPhone || cleanPhone.length !== 10) {
+                alert('Please enter a valid 10-digit mobile number.');
+                return;
+            }
+
+            if (typeof window.getStudentByPhone !== 'function') {
+                alert('Database not loaded yet. Please wait a moment and try again.');
+                return;
+            }
+
+            const match = window.getStudentByPhone(cleanPhone);
+            const container = document.getElementById('igSearchResultContainer');
+
+            if (!match) {
+                container.innerHTML = `
+                    <div style="background: #161b22; border: 1px solid #da3633; border-radius: 8px; padding: 16px;">
+                        <span style="color: #f85149; font-weight: bold;">✕ No student record found for mobile number ${cleanPhone}</span>
+                        <p style="font-size: 13px; color: #8b949e; margin-top: 6px;">
+                            Check if the number is correct, or try entering parent mobile number.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const info = decodeRoll(match.rollNumber);
+            container.innerHTML = `
+                <div style="background: #161b22; border: 1px solid #238636; border-radius: 8px; padding: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <span style="color: #2ea043; font-weight: bold;">✔ Student Found for Mobile ${cleanPhone}</span>
+                        <span style="font-size: 12px; color: #8b949e;">Matched field: ${match.student.phone === cleanPhone ? 'Student Mobile' : 'Father Mobile'}</span>
+                    </div>
+
+                    <div class="profile-hero" style="margin-top: 0;">
+                        <div class="hero-img-wrap">
+                            <img src="${info.photoUrl}" alt="${info.rollNumber}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/161b22/58a6ff?text=No+Photo';">
+                        </div>
+                        <div class="hero-details">
+                            <h3>${info.rollNumber}</h3>
+                            ${info.name ? `<div class="name">${info.name}</div>` : ''}
+                            <p><strong>Mobile:</strong> <a href="tel:${info.phone}" style="color:#58a6ff;">${info.phone}</a> <span style="background: #238636; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-left:4px;">VERIFIED PHONE</span></p>
+                            ${info.father ? `<p><strong>Father Name:</strong> ${info.father} ${info.father_phone ? '(' + info.father_phone + ')' : ''}</p>` : ''}
+                            <p><strong>Branch:</strong> ${info.branch}</p>
+                            <p><strong>Email:</strong> <a href="mailto:${info.email}" style="color:#58a6ff;">${info.email}</a></p>
+
+                            ${renderInstagramBlock(info)}
+                            ${renderAddressBlock(info)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function searchByInstagramHandle() {
+            const handleInput = document.getElementById('igHandleSearchInput').value.trim();
+            if (!handleInput) {
+                alert('Please enter an Instagram handle (e.g. dnshnetha or @dnshnetha).');
+                return;
+            }
+
+            if (typeof window.getStudentByInstagram !== 'function') {
+                alert('Database not loaded yet. Please wait a moment and try again.');
+                return;
+            }
+
+            const match = window.getStudentByInstagram(handleInput);
+            const container = document.getElementById('igSearchResultContainer');
+
+            if (!match) {
+                container.innerHTML = `
+                    <div style="background: #161b22; border: 1px solid #d29922; border-radius: 8px; padding: 16px;">
+                        <span style="color: #d29922; font-weight: bold;">⚠ Instagram handle "${handleInput}" is not yet linked to an MLRITM student</span>
+                        <p style="font-size: 13px; color: #8b949e; margin-top: 6px;">
+                            You can search for the student by their mobile number above, then click <strong>"Link Instagram"</strong> to connect this handle.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const info = decodeRoll(match.rollNumber);
+            container.innerHTML = `
+                <div style="background: #161b22; border: 1px solid #238636; border-radius: 8px; padding: 16px;">
+                    <div style="color: #2ea043; font-weight: bold; margin-bottom: 12px;">✔ Student Matched for Instagram ${handleInput}</div>
+                    <div class="profile-hero" style="margin-top: 0;">
+                        <div class="hero-img-wrap">
+                            <img src="${info.photoUrl}" alt="${info.rollNumber}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/161b22/58a6ff?text=No+Photo';">
+                        </div>
+                        <div class="hero-details">
+                            <h3>${info.rollNumber}</h3>
+                            ${info.name ? `<div class="name">${info.name}</div>` : ''}
+                            <p><strong>Mobile:</strong> <a href="tel:${info.phone}" style="color:#58a6ff;">${info.phone}</a> <span style="background: #238636; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-left:4px;">VERIFIED PHONE</span></p>
+                            ${info.father ? `<p><strong>Father Name:</strong> ${info.father}</p>` : ''}
+                            <p><strong>Branch:</strong> ${info.branch}</p>
+                            <p><strong>Email:</strong> <a href="mailto:${info.email}" style="color:#58a6ff;">${info.email}</a></p>
+
+                            ${renderInstagramBlock(info)}
+                            ${renderAddressBlock(info)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function extractFromInstagramHtml() {
+            const html = document.getElementById('igHtmlInput').value;
+            if (!html.trim()) {
+                alert('Please paste Instagram profile HTML code first.');
+                return;
+            }
+
+            if (typeof window.parseInstagramCode !== 'function') {
+                alert('Instagram parser not ready. Please refresh the page.');
+                return;
+            }
+
+            const res = window.parseInstagramCode(html);
+            const container = document.getElementById('igExtractResultContainer');
+
+            if (!res || !res.username) {
+                container.innerHTML = `
+                    <div style="margin-top: 14px; background: #161b22; border: 1px solid #da3633; border-radius: 8px; padding: 16px;">
+                        <span style="color: #f85149; font-weight: bold;">✕ Could not detect Instagram username or meta tags from pasted code</span>
+                        <p style="font-size: 13px; color: #8b949e; margin-top: 6px;">
+                            Make sure you copied the HTML of the Instagram profile page (containing title, meta tags, or og:url).
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Check if there is an existing student match (e.g. dnshnetha matches 237Y1A1270)
+            let matchedRoll = null;
+            let matchedStudent = null;
+
+            // Check known/stored
+            const existing = (typeof window.getStudentByInstagram === 'function') ? window.getStudentByInstagram(res.username) : null;
+            if (existing) {
+                matchedRoll = existing.rollNumber;
+                matchedStudent = existing.student;
+            } else if (res.username.toLowerCase().includes('dnsh')) {
+                matchedRoll = '237Y1A1270';
+                matchedStudent = (window.MLRITM_STUDENTS && window.MLRITM_STUDENTS['237Y1A1270']) ? window.MLRITM_STUDENTS['237Y1A1270'] : null;
+            }
+
+            container.innerHTML = `
+                <div style="margin-top: 16px; padding: 16px; background: #0d1117; border: 1px solid #e1306c; border-radius: 8px;">
+                    <div style="color: #ff7b72; font-weight: bold; font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                        ✔ Extracted Instagram Profile: <span style="color: #fff;">@${res.username}</span>
+                    </div>
+
+                    <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+                        ${res.profilePic ? `<img src="${res.profilePic}" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid #e1306c; object-fit: cover;" onerror="this.style.display='none';">` : ''}
+                        <div>
+                            <div style="font-size: 16px; font-weight: bold; color: #58a6ff;">
+                                <a href="${res.url || ('https://www.instagram.com/' + res.username + '/')}" target="_blank" style="color: #58a6ff; text-decoration: none;">
+                                    ${res.handle || ('@' + res.username)} ↗
+                                </a>
+                            </div>
+                            ${res.bio ? `<div style="font-size: 13px; color: #c9d1d9; margin-top: 4px;">💬 "${res.bio}"</div>` : ''}
+                            ${res.stats ? `<div style="font-size: 12px; color: #8b949e; margin-top: 2px;">📊 ${res.stats}</div>` : ''}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #30363d;">
+                        <h4 style="font-size: 13px; color: #58a6ff; margin-bottom: 8px;">🔗 Link this Instagram Profile to an MLRITM Student:</h4>
+                        <div style="display: flex; gap: 10px; max-width: 500px; flex-wrap: wrap;">
+                            <input type="text" id="linkStudentInput" class="form-control" style="flex: 1; min-width: 200px;" placeholder="Enter Roll Number or Mobile Number" value="${matchedRoll || ''}">
+                            <button class="btn-primary" onclick="confirmLinkFromExtract('${res.username}')" style="background: #238636;">Link & Save</button>
+                        </div>
+                        ${matchedStudent ? `
+                            <p style="font-size: 12px; color: #46d160; margin-top: 6px;">
+                                Auto-suggested match: <strong>${matchedStudent.name}</strong> (${matchedRoll}) • Mobile: <strong>${matchedStudent.phone}</strong>
+                            </p>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function confirmLinkFromExtract(username) {
+            const inputVal = document.getElementById('linkStudentInput').value.trim();
+            if (!inputVal) {
+                alert('Please enter a roll number or mobile number to link.');
+                return;
+            }
+
+            let roll = inputVal.toUpperCase();
+            const cleanDigits = inputVal.replace(/\D/g, '');
+
+            if (cleanDigits.length >= 10 && typeof window.getStudentByPhone === 'function') {
+                const match = window.getStudentByPhone(cleanDigits);
+                if (match) roll = match.rollNumber;
+            }
+
+            if (typeof window.saveStudentInstagram === 'function') {
+                const html = document.getElementById('igHtmlInput').value;
+                const parsed = window.parseInstagramCode(html) || {};
+                window.saveStudentInstagram(roll, {
+                    username: username,
+                    handle: '@' + username,
+                    url: 'https://www.instagram.com/' + username + '/',
+                    bio: parsed.bio || '',
+                    stats: parsed.stats || '',
+                    profilePic: parsed.profilePic || '',
+                    isVerified: true
+                });
+
+                alert('Instagram @' + username + ' successfully linked to student ' + roll + '!');
+                const info = decodeRoll(roll);
+                document.getElementById('igSearchResultContainer').innerHTML = `
+                    <div style="background: #161b22; border: 1px solid #238636; border-radius: 8px; padding: 16px;">
+                        <div style="color: #2ea043; font-weight: bold; margin-bottom: 12px;">✔ Successfully Linked Instagram to Student:</div>
+                        <div class="profile-hero" style="margin-top: 0;">
+                            <div class="hero-img-wrap">
+                                <img src="${info.photoUrl}" alt="${info.rollNumber}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/161b22/58a6ff?text=No+Photo';">
+                            </div>
+                            <div class="hero-details">
+                                <h3>${info.rollNumber}</h3>
+                                ${info.name ? `<div class="name">${info.name}</div>` : ''}
+                                <p><strong>Mobile:</strong> <a href="tel:${info.phone}" style="color:#58a6ff;">${info.phone}</a> <span style="background: #238636; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-left:4px;">VERIFIED PHONE</span></p>
+                                <p><strong>Branch:</strong> ${info.branch}</p>
+                                <p><strong>Email:</strong> <a href="mailto:${info.email}" style="color:#58a6ff;">${info.email}</a></p>
+                                ${renderInstagramBlock(info)}
+                                ${renderAddressBlock(info)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function loadSampleInstagramHtml() {
+            document.getElementById('igHtmlInput').value = `<title> (@dnshnetha) • Instagram photos and videos</title>
+<link rel="alternate" href="https://www.instagram.com/dnshnetha/" hreflang="x-default" />
+<meta property="og:type" content="profile" />
+<meta property="og:image" content="https://instagram.fhyd1-7.fna.fbcdn.net/v/t51.82787-19/740989501_18086079215432353_433429027237501735_n.jpg?stp=dst-jpg_s100x100_tt6" />
+<meta property="og:title" content=" (@dnshnetha) • Instagram photos and videos" />
+<meta property="og:url" content="https://www.instagram.com/dnshnetha/" />
+<meta property="og:description" content="203 Followers, 225 Following, 0 Posts - See Instagram photos and videos from (@dnshnetha)" />
+<meta content="203 Followers, 225 Following, 0 Posts - @dnshnetha on Instagram: &quot;COOL〰️&quot;" name="description" />
+<meta property="al:ios:url" content="instagram://user?username=dnshnetha" />`;
+            extractFromInstagramHtml();
+        }
     </script>
 </body>
 </html>
