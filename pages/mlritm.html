@@ -419,10 +419,10 @@
     <div class="header">
         <h1>🎓 MLRITM Student Hub</h1>
         <div class="nav-links">
-            <a href="../index.html">← Choose Portal</a>
-            <a href="rollnumberfinished.html">Roll Generator</a>
-            <a href="selectorcomplete.html">Branch Selector</a>
-            <a href="Searchcomplete.html">IARE Search</a>
+            <a id="navChoose" href="index.html">← Choose Portal</a>
+            <a id="navRoll" href="pages/rollnumberfinished.html">Roll Generator</a>
+            <a id="navSelector" href="pages/selectorcomplete.html">Branch Selector</a>
+            <a id="navSearch" href="pages/Searchcomplete.html">IARE Search</a>
         </div>
     </div>
 
@@ -531,8 +531,22 @@
         </div>
     </div>
 
-    <script src="../scripts/mlritm_db.js"></script>
+    <script src="scripts/mlritm_db.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/mlritm_db.js'; document.head.appendChild(s);"></script>
     <script>
+        // Adjust navigation links based on current path
+        (function() {
+            window.addEventListener('DOMContentLoaded', function() {
+                const isPages = window.location.pathname.includes('/pages/');
+                const chooseLink = document.getElementById('navChoose');
+                if (chooseLink) chooseLink.href = isPages ? '../index.html' : 'index.html';
+                const rollLink = document.getElementById('navRoll');
+                if (rollLink) rollLink.href = isPages ? 'rollnumberfinished.html' : 'pages/rollnumberfinished.html';
+                const selectorLink = document.getElementById('navSelector');
+                if (selectorLink) selectorLink.href = isPages ? 'selectorcomplete.html' : 'pages/selectorcomplete.html';
+                const searchLink = document.getElementById('navSearch');
+                if (searchLink) searchLink.href = isPages ? 'Searchcomplete.html' : 'pages/Searchcomplete.html';
+            });
+        })();
         const knownStudents = {
             '237Y1A1270': { name: 'GUNDA DINESH', branch: 'Information Technology (IT)' }
         };
