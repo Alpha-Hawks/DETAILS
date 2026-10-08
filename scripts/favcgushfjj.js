@@ -1281,7 +1281,12 @@ async function gene(startRoll1, endRoll1, startRoll2, endRoll2) {
                         img.src = `https://iare-data.s3.ap-south-1.amazonaws.com/uploads/STUDENTS/${rollNumber}/DOCS/${rollNumber}_Income.jpg`;
                         break;
                     case "Photo":
-                        img.src = `https://iare-data.s3.ap-south-1.amazonaws.com/uploads/STUDENTS/${rollNumber}/${rollNumber}.jpg`;
+                    default:
+                        if (rollNumber.toUpperCase().includes("7Y")) {
+                            img.src = `https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${rollNumber}.jpg`;
+                        } else {
+                            img.src = `https://iare-data.s3.ap-south-1.amazonaws.com/uploads/STUDENTS/${rollNumber}/${rollNumber}.jpg`;
+                        }
                         break;
                 }
 
@@ -1394,6 +1399,45 @@ function appendAdditionalLinks(container, rollNumber) {
         additionalLinksContainer = document.createElement("div");
         additionalLinksContainer.classList.add("additionalLinks");
         container.appendChild(additionalLinksContainer);
+    }
+
+    if (rollNumber.toUpperCase().includes("7Y")) {
+        const upperRoll = rollNumber.toUpperCase();
+        const yearPrefix = upperRoll.substring(0, 2);
+        const joinYear = 2000 + (parseInt(yearPrefix, 10) || 23);
+        const branchCode = upperRoll.substring(6, 8);
+        const branchMap = {
+            '01': 'Civil Engineering (CE)',
+            '02': 'EEE',
+            '03': 'Mechanical Engineering (ME)',
+            '04': 'ECE',
+            '05': 'Computer Science & Engineering (CSE)',
+            '12': 'Information Technology (IT)',
+            '62': 'CSE - Cyber Security (CSC)',
+            '66': 'CSE - AI & ML (CSM)',
+            '67': 'CSE - Data Science (CSD)',
+            '69': 'CSBS'
+        };
+        const branchName = branchMap[branchCode] || `Branch ${branchCode}`;
+        const email = `${upperRoll}@mlritm.ac.in`;
+        const knownName = upperRoll === '237Y1A1270' ? 'GUNDA DINESH' : null;
+
+        additionalLinksContainer.innerHTML = `
+            <div style="background:#222; border:1px solid #00d9ff; border-radius:8px; padding:12px; margin-top:8px; text-align:left; font-size:13px; color:#eee; width:100%; box-sizing:border-box;">
+                <div style="font-weight:bold; color:#00d9ff; font-size:14px; margin-bottom:6px;">🎓 MLRITM Student Details</div>
+                ${knownName ? `<div style="margin-bottom:4px;"><strong>Name:</strong> <span style="color:#ffb74d;">${knownName}</span></div>` : ''}
+                <div style="margin-bottom:4px;"><strong>Roll No:</strong> ${upperRoll}</div>
+                <div style="margin-bottom:4px;"><strong>Email:</strong> <a href="mailto:${email}" style="color:#64b5f6; text-decoration:none;">${email}</a></div>
+                <div style="margin-bottom:4px;"><strong>Branch:</strong> ${branchName}</div>
+                <div style="margin-bottom:4px;"><strong>Batch:</strong> ${joinYear} - ${joinYear + 4}</div>
+                <div style="margin-bottom:6px;"><strong>College:</strong> MLRITM</div>
+                <div style="margin-top:8px; display:flex; gap:6px;">
+                    <a href="https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${upperRoll}.jpg" target="_blank" style="padding:4px 8px; background:#007bff; color:#fff; border-radius:4px; text-decoration:none; font-size:12px;">Full Photo</a>
+                    <button type="button" onclick="navigator.clipboard.writeText('${email}'); alert('Email copied!');" style="padding:4px 8px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer; font-size:12px;">Copy Email</button>
+                </div>
+            </div>
+        `;
+        return;
     }
 
     let promises = [];
