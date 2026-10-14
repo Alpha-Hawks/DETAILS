@@ -530,7 +530,7 @@
                     <h3 style="font-size: 15px; color: #58a6ff; margin-bottom: 6px;">📱 Search by Mobile Number</h3>
                     <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Enter student or parent 10-digit phone number:</p>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="mobileSearchInput" class="form-control" placeholder="e.g. 9573458794" maxlength="15" onkeydown="if(event.key === 'Enter') searchByMobile()">
+                        <input type="text" id="mobileSearchInput" class="form-control" placeholder="Enter 10-digit mobile number" maxlength="15" onkeydown="if(event.key === 'Enter') searchByMobile()">
                         <button class="btn-primary" onclick="searchByMobile()" style="white-space: nowrap;">Search Phone</button>
                     </div>
                 </div>
@@ -540,7 +540,7 @@
                     <h3 style="font-size: 15px; color: #f77737; margin-bottom: 6px;">📸 Search by Instagram ID</h3>
                     <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Enter Instagram username or @handle:</p>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="igHandleSearchInput" class="form-control" placeholder="e.g. @dnshnetha or dnshnetha" onkeydown="if(event.key === 'Enter') searchByInstagramHandle()">
+                        <input type="text" id="igHandleSearchInput" class="form-control" placeholder="Enter Instagram username or @handle" onkeydown="if(event.key === 'Enter') searchByInstagramHandle()">
                         <button class="btn-primary" onclick="searchByInstagramHandle()" style="white-space: nowrap; background: linear-gradient(45deg, #f09433, #dc2743);">Find Student</button>
                     </div>
                 </div>
@@ -555,10 +555,9 @@
                 <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">
                     Paste Instagram profile HTML code below (with title, meta tags, or page source), and click extract to read the username, followers, bio, and link to a student's mobile number:
                 </p>
-                <textarea id="igHtmlInput" class="form-control" style="min-height: 120px;" placeholder="Paste Instagram profile HTML here (e.g. <!DOCTYPE html><html ...>)..."></textarea>
+                <textarea id="igHtmlInput" class="form-control" style="min-height: 120px;" placeholder="Paste Instagram profile HTML here..."></textarea>
                 <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="btn-primary" onclick="extractFromInstagramHtml()" style="background: linear-gradient(45deg, #f09433, #dc2743);">Extract & Link Profile</button>
-                    <button class="btn-card" onclick="loadSampleInstagramHtml()">Paste Sample Instagram Code</button>
                 </div>
                 <div id="igExtractResultContainer"></div>
             </div>
@@ -671,7 +670,7 @@
                             ${hasIg ? '<span style="background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); color: #fff; font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 4px;">LINKED</span>' : '<span style="background: #21262d; color: #8b949e; font-size: 10px; padding: 1px 6px; border-radius: 4px;">NOT LINKED</span>'}
                             ${ig && ig.isVerified ? '<span style="background: #238636; color: #fff; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 4px;">VERIFIED</span>' : ''}
                         </div>
-                        <button onclick="promptEditInstagram('${info.rollNumber}')" style="background: #21262d; border: 1px solid #30363d; color: #ff7b72; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer;">✏️ Link/Edit ID</button>
+                        <button onclick="promptEditInstagram('${info.rollNumber}')" style="background: #21262d; border: 1px solid #30363d; color: #ff7b72; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer;">${hasIg ? '✏️ Edit ID' : '➕ Link ID'}</button>
                     </div>
 
                     ${hasIg ? `
@@ -694,11 +693,9 @@
                         </div>
                     ` : `
                         <div style="font-size: 12px; color: #8b949e; margin-bottom: 8px;">
-                            No Instagram account directly linked yet for mobile <strong style="color: #58a6ff;">${info.phone || 'N/A'}</strong>.
+                            No Instagram ID linked.
                         </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <a href="https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(info.name || info.rollNumber)}" target="_blank" class="btn-card" style="padding: 5px 10px; background: #21262d; border: 1px solid #e1306c55; color: #ff7b72; text-decoration: none; border-radius: 6px; font-size: 12px;">🔍 Search Name on Instagram</a>
-                            <a href="https://www.google.com/search?q=site:instagram.com+${encodeURIComponent((info.name || '') + ' ' + (info.phone || ''))}" target="_blank" class="btn-card" style="padding: 5px 10px; background: #21262d; border: 1px solid #30363d; color: #79c0ff; text-decoration: none; border-radius: 6px; font-size: 12px;">🌐 Google Instagram Search</a>
                             <button onclick="promptEditInstagram('${info.rollNumber}')" class="btn-card" style="padding: 5px 10px; background: #238636; border: none; color: #fff; border-radius: 6px; font-size: 12px;">➕ Link Instagram</button>
                         </div>
                     `}
@@ -708,7 +705,7 @@
 
         function promptEditInstagram(roll) {
             const current = (typeof window.getStudentInstagram === 'function') ? window.getStudentInstagram(roll) : {};
-            const handle = prompt("Enter Instagram Username or Handle (e.g. dnshnetha or @dnshnetha):", current?.username || current?.handle || "");
+            const handle = prompt("Enter Instagram Username or Handle:", current?.username || current?.handle || "");
             if (handle === null) return;
             const clean = handle.replace(/^@/, '').trim();
             if (!clean) {
@@ -722,7 +719,7 @@
                 return;
             }
             const bio = prompt("Enter Instagram Bio / Description (optional):", current?.bio || "");
-            const stats = prompt("Enter Instagram Stats (e.g. 200 Followers) (optional):", current?.stats || "");
+            const stats = prompt("Enter Instagram Stats (optional):", current?.stats || "");
 
             if (typeof window.saveStudentInstagram === 'function') {
                 window.saveStudentInstagram(roll, {
@@ -754,7 +751,7 @@
                             ${isVerified ? '<span style="background: #238636; color: #fff; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 4px;">VERIFIED RESIDENCE</span>' : ''}
                             ${addr && addr.isCustom ? '<span style="background: #1f6feb; color: #fff; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 4px;">SAVED</span>' : ''}
                         </div>
-                        <button onclick="promptEditAddress('${info.rollNumber}')" style="background: #21262d; border: 1px solid #30363d; color: #79c0ff; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer;">✏️ Edit</button>
+                        <button onclick="promptEditAddress('${info.rollNumber}')" style="background: #21262d; border: 1px solid #30363d; color: #79c0ff; border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer;">${hasRealAddress ? '✏️ Edit' : '➕ Add'}</button>
                     </div>
 
                     <!-- Home Residential Address -->
@@ -767,22 +764,14 @@
                                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr.formatted)}" target="_blank" style="color: #58a6ff; font-size: 11px; text-decoration: none;">🗺️ Open in Google Maps</a>
                             </div>
                         ` : `
-                            <div style="color: #d29922; margin-top: 3px; font-style: italic;">
-                                Home address not synced from Anvaya ERP profile
+                            <div style="color: #8b949e; margin-top: 3px;">
+                                No address details available.
                             </div>
-                            <div style="font-size: 11px; color: #8b949e; margin-top: 4px; display: flex; gap: 8px; flex-wrap: wrap;">
-                                <a href="https://anvaya.mlritm.ac.in/App/StudentProfile" target="_blank" style="color: #58a6ff; text-decoration: none;">🔗 Open Anvaya ERP Profile</a>
-                                <span>•</span>
-                                <a href="javascript:void(0)" onclick="promptEditAddress('${info.rollNumber}')" style="color: #58a6ff; text-decoration: none;">➕ Enter Real Address</a>
+                            <div style="font-size: 11px; color: #8b949e; margin-top: 4px;">
+                                <a href="javascript:void(0)" onclick="promptEditAddress('${info.rollNumber}')" style="color: #58a6ff; text-decoration: none;">➕ Enter Address</a>
                             </div>
                         `}
                     </div>
-
-                    <!-- Campus Location -->
-                    <div style="border-top: 1px solid #21262d; padding-top: 6px; margin-top: 6px; font-size: 11px; color: #8b949e;">
-                        <strong style="color: #aaa;">🏛️ College Campus:</strong> MLRITM, Dundigal, Gandi Maisamma, Hyderabad - 500043
-                    </div>
-                    ${info.father_phone ? `<div style="font-size: 11px; margin-top: 4px; color: #8b949e;"><strong>Emergency Contact (Father):</strong> <a href="tel:${info.father_phone}" style="color: #58a6ff; text-decoration: none;">${info.father_phone}</a></div>` : ''}
                 </div>
             `;
         }
@@ -1036,13 +1025,13 @@
 
         function promptEditAddress(roll) {
             const current = (typeof window.getStudentAddress === 'function') ? window.getStudentAddress(roll) : {};
-            const line1 = prompt("Enter Student House No / Street / Village (e.g. H.No 1-30-9, Yellamla):", current.doorNo || current.street || current.line1 || "");
+            const line1 = prompt("Enter Student House No / Street / Village:", current.doorNo || current.street || current.line1 || "");
             if (line1 === null) return;
-            const town = prompt("Enter Student Town / Mandal / City (e.g. Jangaon):", current.town || current.mandal || current.city || "");
+            const town = prompt("Enter Student Town / Mandal / City:", current.town || current.mandal || current.city || "");
             if (town === null) return;
-            const district = prompt("Enter Student District (e.g. Warangal / Jangaon / Hyderabad / Karimnagar):", current.district || "");
+            const district = prompt("Enter Student District:", current.district || "");
             if (district === null) return;
-            const pincode = prompt("Enter Student PIN Code (e.g. 506167):", current.pincode || "");
+            const pincode = prompt("Enter Student PIN Code:", current.pincode || "");
             if (pincode === null) return;
 
             const updated = {
@@ -1143,7 +1132,7 @@
         function searchByInstagramHandle() {
             const handleInput = document.getElementById('igHandleSearchInput').value.trim();
             if (!handleInput) {
-                alert('Please enter an Instagram handle (e.g. dnshnetha or @dnshnetha).');
+                alert('Please enter an Instagram handle.');
                 return;
             }
 
@@ -1218,7 +1207,7 @@
                 return;
             }
 
-            // Check if there is an existing student match (e.g. dnshnetha matches 237Y1A1270)
+            // Check if there is an existing linked student match
             let matchedRoll = null;
             let matchedStudent = null;
 
@@ -1227,9 +1216,6 @@
             if (existing) {
                 matchedRoll = existing.rollNumber;
                 matchedStudent = existing.student;
-            } else if (res.username.toLowerCase().includes('dnsh')) {
-                matchedRoll = '237Y1A1270';
-                matchedStudent = (window.MLRITM_STUDENTS && window.MLRITM_STUDENTS['237Y1A1270']) ? window.MLRITM_STUDENTS['237Y1A1270'] : null;
             }
 
             container.innerHTML = `
@@ -1317,19 +1303,6 @@
                     </div>
                 `;
             }
-        }
-
-        function loadSampleInstagramHtml() {
-            document.getElementById('igHtmlInput').value = `<title> (@dnshnetha) • Instagram photos and videos</title>
-<link rel="alternate" href="https://www.instagram.com/dnshnetha/" hreflang="x-default" />
-<meta property="og:type" content="profile" />
-<meta property="og:image" content="https://instagram.fhyd1-7.fna.fbcdn.net/v/t51.82787-19/740989501_18086079215432353_433429027237501735_n.jpg?stp=dst-jpg_s100x100_tt6" />
-<meta property="og:title" content=" (@dnshnetha) • Instagram photos and videos" />
-<meta property="og:url" content="https://www.instagram.com/dnshnetha/" />
-<meta property="og:description" content="203 Followers, 225 Following, 0 Posts - See Instagram photos and videos from (@dnshnetha)" />
-<meta content="203 Followers, 225 Following, 0 Posts - @dnshnetha on Instagram: &quot;COOL〰️&quot;" name="description" />
-<meta property="al:ios:url" content="instagram://user?username=dnshnetha" />`;
-            extractFromInstagramHtml();
         }
     </script>
 </body>
