@@ -4,12 +4,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Student Information Search</title>
+    <title>Student Information Search - MLRITM</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/trels.css">
     <style>
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 20px auto;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        .top-nav a {
+            color: #00d9ff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+        .top-nav a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
         .welcome-top-bar {
             display: none !important;
         }
@@ -17,6 +44,12 @@
 </head>
 
 <body>
+    <div class="top-nav">
+        <a href="../mlritm.html">&larr; Back to MLRITM Portal</a>
+        <span style="color: #8b949e; font-size: 13px;">MLRITM Student Directory Search</span>
+        <a href="selectorcomplete.html">Class Selector &rarr;</a>
+    </div>
+
     <div id="hide" class="form-container" style="display: block;">
         <center>
             <div class="search-container">
@@ -38,6 +71,7 @@
         <div id="imageGallery"></div>
     </div>
 
+    <script src="../scripts/mlritm_db.js"></script>
     <script src="../scripts/bsdedd.js"></script>
     <script src="../scripts/asdeddd.js"></script>
 </body>

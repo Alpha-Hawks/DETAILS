@@ -321,6 +321,10 @@ function findNames() {
                 const filterValue = filter.searchValue.toLowerCase();
 
                 if (filter.isExactMatch) {
+                    if (filter.headerName.toLowerCase().includes('dob') || filter.headerName.toLowerCase().includes('date')) {
+                        const reversedFilter = filterValue.split('-').reverse().join('-');
+                        return cellValue === filterValue || cellValue === reversedFilter;
+                    }
                     return cellValue === filterValue;
                 } else {
                     return cellValue.includes(filterValue);
@@ -401,7 +405,10 @@ function createStudentCard(row, resultsContainer) {
     const studentName = nameIndex !== -1 ? row[nameIndex] : '';
 
     const mainImage = document.createElement('img');
-    mainImage.src = `https://iare-data.s3.ap-south-1.amazonaws.com/uploads/STUDENTS/${rollNumber}/${rollNumber}.jpg`;
+    const isMLRITM = rollNumber.toUpperCase().includes('7Y');
+    mainImage.src = isMLRITM
+        ? `https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${rollNumber}.jpg`
+        : `https://iare-data.s3.ap-south-1.amazonaws.com/uploads/STUDENTS/${rollNumber}/${rollNumber}.jpg`;
     mainImage.alt = `${studentName}'s Photo`;
     mainImage.className = 'student-image';
 
@@ -665,6 +672,19 @@ function createStudentCard(row, resultsContainer) {
 }
 
 async function preloadAdditionalImages(rollNumber) {
+    const isMLRITM = rollNumber.toUpperCase().includes('7Y');
+    if (isMLRITM) {
+        const img = new Image();
+        img.src = `https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${rollNumber}.jpg`;
+        img.alt = `${rollNumber} Photo`;
+        img.style.maxWidth = '90%';
+        img.style.borderRadius = '8px';
+        return new Promise(resolve => {
+            img.onload = () => resolve([img]);
+            img.onerror = () => resolve([]);
+        });
+    }
+
     const certificates = ["SSC", "INTER", "Aadhar", "Caste", "Income", "Photo"];
     const imagePromises = certificates.map(cert => {
         const img = new Image();
