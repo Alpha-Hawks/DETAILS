@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLRITM | Student ERP & Academic Services Portal</title>
+    <meta name="description" content="Centralized enterprise student ERP navigation and academic service directory for MLRITM (Marri Laxman Reddy Institute of Technology and Management).">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0f1d;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(16, 24, 46, 0.7);
+            --bg-card-hover: rgba(22, 33, 62, 0.9);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-focus: #388bfd;
+            --accent-blue: #388bfd;
+            --accent-cyan: #38bdf8;
+            --accent-green: #2ea043;
+            --accent-amber: #f59e0b;
+            --accent-purple: #a855f7;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --badge-bg: rgba(56, 189, 248, 0.12);
+            --badge-text: #38bdf8;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            --card-shadow-hover: 0 20px 35px -5px rgba(14, 165, 233, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.6);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-heading: 'Poppins', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px 20px 60px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+
+        /* Top Header Bar */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-bottom: 20px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-brand h1 {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            border-color: var(--accent-blue);
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+        }
+
+        /* Hero Banner */
+        .hero {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8, #38bdf8);
+        }
+
+        .hero h2 {
+            font-family: var(--font-heading);
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+
+        /* Institutional Security Boundary Banner */
+        .security-badge-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .security-badge-banner .item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .security-badge-banner svg {
+            color: var(--accent-green);
+        }
+
+        /* Filter Controls */
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 13px 48px 13px 44px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .shortcut-badge {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: monospace;
+            pointer-events: none;
+        }
+
+        /* Filter Category Pills */
+        .category-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pill-btn {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .pill-btn:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .pill-btn.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+            border-color: var(--accent-cyan);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+
+        .pill-count {
+            display: inline-block;
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+            color: var(--text-primary);
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Service Card */
+        .service-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px);
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: transparent;
+            transition: background 0.25s ease;
+        }
+
+        .service-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .service-card:hover::after {
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            flex-shrink: 0;
+        }
+
+        .service-card:hover .icon-wrap {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+        }
+
+        .category-tag {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            letter-spacing: 0.3px;
+        }
+
+        .service-title {
+            font-family: var(--font-heading);
+            font-size: 17px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+
+        .service-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+
+        .route-badge {
+            font-family: monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 16px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .route-badge svg {
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .auth-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .auth-pill.required {
+            color: var(--accent-amber);
+        }
+
+        .auth-pill.gateway {
+            color: var(--accent-green);
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            border: 1px solid #3b82f6;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-action:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-action.gateway {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            border-color: #34d399;
+        }
+
+        .btn-action.gateway:hover {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border: 1px dashed var(--border-subtle);
+            border-radius: var(--radius-lg);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Safe Exit & External Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 8, 16, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #0f172a;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: var(--radius-lg);
+            max-width: 520px;
+            width: 100%;
+            padding: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            position: relative;
+            animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .modal-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #34d399;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .modal-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .destination-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            margin: 12px 0;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+            color: var(--accent-cyan);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            border: 1px solid #34d399;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-confirm:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero {
+                padding: 20px;
+            }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Navigation Bar -->
+        <header class="header">
+            <div class="header-brand">
+                <h1>MLRITM Student Hub</h1>
+                <span class="header-tag">ERP & Services</span>
+            </div>
+            <nav class="nav-links">
+                <a href="../index.html" class="nav-link">← Choose Portal</a>
+                <a href="../mlritm.html" class="nav-link">Student Hub & Search</a>
+                <a href="selectorcomplete.html" class="nav-link">Branch Selector</a>
+                <a href="rollnumberfinished.html" class="nav-link">Roll Generator</a>
+                <a href="Searchcomplete.html" class="nav-link">IARE Search</a>
+            </nav>
+        </header>
+
+        <!-- Executive Hero Banner -->
+        <section class="hero">
+            <h2>Academic Services & ERP Route Directory</h2>
+            <p>
+                Access verified institutional academic routes, examination registrations, fee receipts, and official payment services for Marri Laxman Reddy Institute of Technology and Management (MLRITM).
+            </p>
+            <div class="security-badge-banner">
+                <div class="item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>ERP Platform: <strong>OrgMaker ERP (Tenant 5004)</strong></span>
+                </div>
+                <div class="item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span>Student Role: <strong>UserTypeId 70</strong></span>
+                </div>
+                <div class="item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <span>Session Safety: <strong>Browser Native Sessions Only (No Password Storage)</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls: Search & Category Filters -->
+        <section class="controls-panel">
+            <div class="search-row">
+                <div class="search-wrap">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="serviceSearchInput" class="search-input" placeholder="Search services (e.g. Hall Ticket, Revaluation, Fee Receipts, Profile)..." autocomplete="off">
+                    <span class="shortcut-badge">Ctrl + K</span>
+                </div>
+            </div>
+
+            <div class="category-pills" id="categoryPillsContainer">
+                <!-- Injected via JavaScript -->
+            </div>
+        </section>
+
+        <!-- Services Grid -->
+        <main class="services-grid" id="servicesGrid">
+            <!-- Dynamic Service Cards Injected via JavaScript -->
+        </main>
+
+        <!-- Safe External Navigation Dialog -->
+        <div id="externalModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <div class="modal-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="modal-title" id="modalTitle">Official Payment Gateway</h3>
+                        <div style="font-size: 11px; color: var(--accent-green); font-weight: 600;">VERIFIED INSTITUTIONAL DESTINATION</div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        You are proceeding to the official MLRITM Fee Payment Gateway powered by <strong>Kotak Mahindra Bank</strong> and <strong>CCAvenue</strong>:
+                    </p>
+                    <div class="destination-box" id="modalDestinationUrl">
+                        https://formbuilder.ccavenue.com/live/kotak-mahindra/...
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        ✔ No credit card, debit card, UPI, or net banking credentials are ever collected, processed, or stored on this hub.
+                    </p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="closeExternalModal()">Cancel</button>
+                    <button class="btn-confirm" id="btnConfirmExit" onclick="proceedToExternal()">
+                        Proceed to Payment
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Institutional Footer -->
+        <footer class="footer">
+            <p>
+                Marri Laxman Reddy Institute of Technology and Management (Autonomous) • Dundigal, Hyderabad - 500043
+            </p>
+            <p style="margin-top: 4px;">
+                Institutional ERP: <a href="https://anvaya.mlritm.ac.in/" target="_blank" rel="noopener noreferrer">anvaya.mlritm.ac.in</a> • 
+                Official Fee Gateway: <a href="https://formbuilder.ccavenue.com/live/kotak-mahindra/marri-laxman-reddy-institute-of-technology-and-management/mlritm" target="_blank" rel="noopener noreferrer">CCAvenue Kotak Gateway</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- ERP Route Registry -->
+    <script src="../scripts/erp_routes.js"></script>
+
+    <script>
+        // State
+        let currentCategory = 'All';
+        let currentSearchQuery = '';
+        let pendingExternalUrl = null;
+
+        // SVG Icon Mapping
+        const ICONS = {
+            'user': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+            'ticket': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path><line x1="13" y1="5" x2="13" y2="7"></line><line x1="13" y1="11" x2="13" y2="13"></line><line x1="13" y1="17" x2="13" y2="19"></line></svg>',
+            'book': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+            'clipboard-check': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><polyline points="9 14 12 17 16 11"></polyline></svg>',
+            'calendar-check': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><polyline points="9 16 12 19 17 14"></polyline></svg>',
+            'calendar': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+            'receipt': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"></path><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="12" y2="14"></line></svg>',
+            'shield-alert': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
+            'credit-card': '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>'
+        };
+
+        // Render Category Filter Pills
+        function renderCategoryPills() {
+            const container = document.getElementById('categoryPillsContainer');
+            if (!container || !window.ErpRouteRegistry) return;
+
+            const categories = window.ErpRouteRegistry.getCategories();
+            const allServices = window.ErpRouteRegistry.ERP_SERVICES;
+
+            container.innerHTML = categories.map(cat => {
+                const count = cat === 'All' 
+                    ? allServices.length 
+                    : allServices.filter(s => s.category === cat).length;
+                const isActive = cat === currentCategory;
+
+                return `
+                    <button class="pill-btn ${isActive ? 'active' : ''}" onclick="selectCategory('${cat}')">
+                        ${cat}
+                        <span class="pill-count">${count}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Render Service Cards Grid
+        function renderServices() {
+            const grid = document.getElementById('servicesGrid');
+            if (!grid || !window.ErpRouteRegistry) return;
+
+            const services = window.ErpRouteRegistry.listServices(currentCategory, currentSearchQuery);
+
+            if (services.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Academic Services Found</h3>
+                        <p>No services match "${escapeHtml(currentSearchQuery)}". Try searching for "Hall Ticket", "Fee", or "Exam".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = services.map(service => {
+                const iconSvg = ICONS[service.icon] || ICONS['book'];
+                const isExternal = service.isExternal;
+                const routeDisplay = isExternal ? 'formbuilder.ccavenue.com/.../mlritm' : service.path;
+
+                return `
+                    <article class="service-card" id="card-${service.id}">
+                        <div>
+                            <div class="card-top">
+                                <div class="icon-wrap" aria-hidden="true">
+                                    ${iconSvg}
+                                </div>
+                                <span class="category-tag">${service.category}</span>
+                            </div>
+
+                            <h3 class="service-title">${escapeHtml(service.title)}</h3>
+                            <p class="service-desc">${escapeHtml(service.description)}</p>
+
+                            <div class="route-badge" title="Target: ${routeDisplay}">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                <span>${escapeHtml(routeDisplay)}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <span class="auth-pill ${isExternal ? 'gateway' : 'required'}">
+                                ${isExternal ? '🌐 Official Gateway' : '🔒 ERP Session'}
+                            </span>
+                            <button class="btn-action ${isExternal ? 'gateway' : ''}" onclick="handleServiceClick('${service.id}')">
+                                <span>${escapeHtml(service.actionLabel || 'Open Service')}</span>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </button>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // Service Click Handler
+        function handleServiceClick(serviceId) {
+            window.ErpRouteRegistry.openService(serviceId, {
+                onExternalPrompt: (service, url) => {
+                    pendingExternalUrl = url;
+                    const modal = document.getElementById('externalModal');
+                    const destBox = document.getElementById('modalDestinationUrl');
+                    if (destBox) destBox.textContent = url;
+                    if (modal) modal.classList.add('active');
+                }
+            });
+        }
+
+        function closeExternalModal() {
+            const modal = document.getElementById('externalModal');
+            if (modal) modal.classList.remove('active');
+            pendingExternalUrl = null;
+        }
+
+        function proceedToExternal() {
+            if (pendingExternalUrl) {
+                window.open(pendingExternalUrl, '_blank', 'noopener,noreferrer');
+                closeExternalModal();
+            }
+        }
+
+        function selectCategory(category) {
+            currentCategory = category;
+            renderCategoryPills();
+            renderServices();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize and Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategoryPills();
+            renderServices();
+
+            const searchInput = document.getElementById('serviceSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearchQuery = e.target.value;
+                    renderServices();
+                });
+            }
+
+            // Keyboard shortcut: Ctrl + K or '/'
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey && e.key.toLowerCase() === 'k') || (e.key === '/' && document.activeElement !== searchInput)) {
+                    e.preventDefault();
+                    if (searchInput) {
+                        searchInput.focus();
+                        searchInput.select();
+                    }
+                } else if (e.key === 'Escape') {
+                    closeExternalModal();
+                    if (searchInput && document.activeElement === searchInput) {
+                        searchInput.blur();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

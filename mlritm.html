@@ -413,6 +413,176 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Tab 6: ERP & Academic Services */
+        .erp-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .erp-search-wrap {
+            position: relative;
+            max-width: 600px;
+        }
+
+        .erp-search-input {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 10px 14px 10px 38px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .erp-search-input:focus {
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+        }
+
+        .erp-search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8b949e;
+            pointer-events: none;
+        }
+
+        .erp-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .erp-pill-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .erp-pill-btn:hover {
+            color: #e6edf3;
+            border-color: #58a6ff;
+        }
+
+        .erp-pill-btn.active {
+            background: #1f6feb;
+            border-color: #388bfd;
+            color: #fff;
+        }
+
+        .erp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .erp-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .erp-card:hover {
+            transform: translateY(-3px);
+            border-color: #58a6ff;
+            box-shadow: 0 8px 24px rgba(88, 166, 255, 0.15);
+        }
+
+        .erp-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .erp-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #38bdf8;
+        }
+
+        .erp-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #21262d;
+            color: #8b949e;
+            border: 1px solid #30363d;
+        }
+
+        .erp-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 6px;
+        }
+
+        .erp-card-desc {
+            font-size: 12px;
+            color: #8b949e;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            flex-grow: 1;
+        }
+
+        .erp-route-preview {
+            font-family: monospace;
+            font-size: 11px;
+            color: #6e7681;
+            background: #161b22;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #21262d;
+            margin-bottom: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .erp-card-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #21262d;
+        }
+
+        .erp-auth-pill {
+            font-size: 11px;
+            color: #e3b341;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .erp-auth-pill.gateway {
+            color: #3fb950;
+        }
     </style>
 </head>
 <body>
@@ -423,6 +593,7 @@
             <a id="navRoll" href="pages/rollnumberfinished.html">Roll Generator</a>
             <a id="navSelector" href="pages/selectorcomplete.html">Branch Selector</a>
             <a id="navSearch" href="pages/Searchcomplete.html">IARE Search</a>
+            <a id="navErp" href="pages/erp_services.html" style="border-color: #388bfd; color: #58a6ff;">🏛 ERP Services</a>
         </div>
     </div>
 
@@ -434,6 +605,7 @@
             <button class="tab-btn" onclick="switchTab('branch')">Quick Branch Browser</button>
             <button class="tab-btn" onclick="switchTab('instagram')">📸 Instagram & Mobile Finder</button>
             <button class="tab-btn" onclick="switchTab('html')">Portal HTML Extractor</button>
+            <button class="tab-btn" onclick="switchTab('erp')">🏛 ERP & Academic Services</button>
         </div>
 
         <!-- Tab 1: Single Student Search -->
@@ -563,6 +735,44 @@
             </div>
         </div>
 
+        <!-- Tab 6: ERP & Academic Services -->
+        <div id="tab-erp" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+                <h2 style="font-size: 18px; color: #58a6ff; display: flex; align-items: center; gap: 8px;">
+                    <span>🏛 MLRITM Student ERP & Academic Services</span>
+                </h2>
+                <a id="btnOpenDedicatedErp" href="pages/erp_services.html" target="_blank" style="font-size: 12px; color: #58a6ff; text-decoration: none; border: 1px solid #388bfd; padding: 4px 10px; border-radius: 6px; background: #21262d;">
+                    Open Full Page Portal ↗
+                </a>
+            </div>
+
+            <!-- ERP Information & Security Boundary Banner -->
+            <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px 18px; margin-bottom: 18px; font-size: 12px; color: #8b949e; line-height: 1.6;">
+                <div style="display: flex; align-items: center; gap: 8px; color: #e6edf3; font-weight: 600; margin-bottom: 4px;">
+                    <span style="color: #2ea043;">✔</span> Verified Institutional ERP Route Integration (Tenant: 5004 • Student Role: UserTypeId 70)
+                </div>
+                <div>
+                    Services navigate directly to official institutional systems. For protected routes, ensure you are logged into your active Anvaya ERP session in your browser. All payments are dispatched strictly to the official MLRITM Kotak Mahindra Bank / CCAvenue gateway.
+                </div>
+            </div>
+
+            <!-- Controls: Search & Category Pills -->
+            <div class="erp-controls">
+                <div class="erp-search-wrap">
+                    <span class="erp-search-icon">🔍</span>
+                    <input type="text" id="erpTabSearchInput" class="erp-search-input" placeholder="Search academic services (e.g. Hall Ticket, Revaluation, Fee Receipts)..." oninput="filterErpTabServices()">
+                </div>
+                <div class="erp-pills" id="erpTabCategoryPills">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Services Grid -->
+            <div class="erp-grid" id="erpTabServicesGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
         <!-- Gallery / Results Section -->
         <div class="results-section">
             <div id="gallerySpinner" class="spinner"></div>
@@ -579,6 +789,7 @@
     </div>
 
     <script src="scripts/mlritm_db.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/mlritm_db.js'; document.head.appendChild(s);"></script>
+    <script src="scripts/erp_routes.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/erp_routes.js'; document.head.appendChild(s);"></script>
     <script>
         // Adjust navigation links based on current path
         (function() {
@@ -592,6 +803,10 @@
                 if (selectorLink) selectorLink.href = isPages ? 'selectorcomplete.html' : 'pages/selectorcomplete.html';
                 const searchLink = document.getElementById('navSearch');
                 if (searchLink) searchLink.href = isPages ? 'Searchcomplete.html' : 'pages/Searchcomplete.html';
+                const erpLink = document.getElementById('navErp');
+                if (erpLink) erpLink.href = isPages ? 'erp_services.html' : 'pages/erp_services.html';
+                const erpBtnDedicated = document.getElementById('btnOpenDedicatedErp');
+                if (erpBtnDedicated) erpBtnDedicated.href = isPages ? 'erp_services.html' : 'pages/erp_services.html';
             });
         })();
         const knownStudents = {};
@@ -652,6 +867,10 @@
 
             const targetTab = document.getElementById(`tab-${tabName}`);
             if (targetTab) targetTab.classList.add('active');
+
+            if (tabName === 'erp') {
+                renderErpTab();
+            }
         }
 
         function renderInstagramBlock(info) {
@@ -1301,6 +1520,121 @@
                     </div>
                 `;
             }
+        }
+
+        // ==================== ERP Tab Controller ====================
+        let currentErpCategory = 'All';
+        let erpTabInitialized = false;
+
+        function renderErpTab() {
+            if (!window.ErpRouteRegistry) {
+                setTimeout(renderErpTab, 100);
+                return;
+            }
+
+            renderErpTabCategories();
+            renderErpTabServices();
+            erpTabInitialized = true;
+        }
+
+        function renderErpTabCategories() {
+            const container = document.getElementById('erpTabCategoryPills');
+            if (!container || !window.ErpRouteRegistry) return;
+
+            const categories = window.ErpRouteRegistry.getCategories();
+            const allServices = window.ErpRouteRegistry.ERP_SERVICES;
+
+            container.innerHTML = categories.map(cat => {
+                const count = cat === 'All' 
+                    ? allServices.length 
+                    : allServices.filter(s => s.category === cat).length;
+                const isActive = cat === currentErpCategory;
+
+                return `
+                    <button class="erp-pill-btn ${isActive ? 'active' : ''}" onclick="selectErpCategory('${cat}')">
+                        ${cat} (${count})
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectErpCategory(cat) {
+            currentErpCategory = cat;
+            renderErpTabCategories();
+            renderErpTabServices();
+        }
+
+        function filterErpTabServices() {
+            renderErpTabServices();
+        }
+
+        function renderErpTabServices() {
+            const grid = document.getElementById('erpTabServicesGrid');
+            if (!grid || !window.ErpRouteRegistry) return;
+
+            const queryInput = document.getElementById('erpTabSearchInput');
+            const query = queryInput ? queryInput.value.trim() : '';
+
+            const services = window.ErpRouteRegistry.listServices(currentErpCategory, query);
+
+            if (services.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #0d1117; border: 1px dashed #30363d; border-radius: 8px; color: #8b949e;">
+                        <h4 style="color: #e6edf3; margin-bottom: 6px;">No Academic Services Found</h4>
+                        <p style="font-size: 13px;">No service matched "${query}". Try searching for "Hall Ticket" or "Fee".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const iconsMap = {
+                'user': '👤',
+                'ticket': '🎟',
+                'book': '📖',
+                'clipboard-check': '📋',
+                'calendar-check': '📝',
+                'calendar': '📅',
+                'receipt': '🧾',
+                'shield-alert': '🛡',
+                'credit-card': '💳'
+            };
+
+            grid.innerHTML = services.map(s => {
+                const icon = iconsMap[s.icon] || '📁';
+                const isExternal = s.isExternal;
+                const routePreview = isExternal ? 'formbuilder.ccavenue.com/.../mlritm' : s.path;
+
+                return `
+                    <div class="erp-card">
+                        <div>
+                            <div class="erp-card-header">
+                                <div class="erp-icon" style="font-size: 20px;">
+                                    ${icon}
+                                </div>
+                                <span class="erp-tag">${s.category}</span>
+                            </div>
+                            <h3 class="erp-card-title">${s.title}</h3>
+                            <p class="erp-card-desc">${s.description}</p>
+                            <div class="erp-route-preview" title="${routePreview}">
+                                ↳ ${routePreview}
+                            </div>
+                        </div>
+                        <div class="erp-card-actions">
+                            <span class="erp-auth-pill ${isExternal ? 'gateway' : ''}">
+                                ${isExternal ? '🌐 Official Gateway' : '🔒 ERP Session'}
+                            </span>
+                            <button class="btn-card primary" onclick="openErpTabService('${s.id}')" style="flex: 0 0 auto; padding: 6px 12px; font-size: 12px;">
+                                ${s.actionLabel || 'Open Service'} ↗
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openErpTabService(serviceId) {
+            if (!window.ErpRouteRegistry) return;
+            window.ErpRouteRegistry.openService(serviceId);
         }
     </script>
 </body>
