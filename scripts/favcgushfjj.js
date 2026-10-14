@@ -1419,8 +1419,8 @@ function appendAdditionalLinks(container, rollNumber) {
             '69': 'CSBS'
         };
         const branchName = branchMap[branchCode] || `Branch ${branchCode}`;
-        const email = `${upperRoll}@mlritm.ac.in`;
-        const knownName = upperRoll === '237Y1A1270' ? 'GUNDA DINESH' : null;
+        const db = (typeof window !== 'undefined' && window.MLRITM_STUDENTS) ? window.MLRITM_STUDENTS[upperRoll] : null;
+        const knownName = (db && db.name) ? db.name : null;
 
         additionalLinksContainer.innerHTML = `
             <div style="background:#222; border:1px solid #00d9ff; border-radius:8px; padding:12px; margin-top:8px; text-align:left; font-size:13px; color:#eee; width:100%; box-sizing:border-box;">

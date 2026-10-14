@@ -39,7 +39,7 @@ function decodeStudentDetails(rollNumber) {
         ? 'MLRITM - Marri Laxman Reddy Institute of Technology and Management' 
         : 'IARE - Institute of Aeronautical Engineering';
 
-    const studentName = (dbData && dbData.name) ? dbData.name : (upperRoll === '237Y1A1270' ? 'GUNDA DINESH' : null);
+    const studentName = (dbData && dbData.name) ? dbData.name : null;
 
     return {
         rollNumber: upperRoll,
@@ -246,15 +246,7 @@ function appendAdditionalLinks(container, rollNumber) {
                         <div style="margin-bottom:6px;">
                             <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.address.formatted)}" target="_blank" style="color:#64b5f6; font-size:11px; text-decoration:none;">🗺️ View Home on Google Maps</a>
                         </div>
-                    ` : `
-                        <div style="font-size:12px; margin-bottom:4px; color:#8b949e;">
-                            <strong>🏠 Residential Address:</strong> 
-                            <span style="font-style:italic; color:#e3b341;">Not synced from Anvaya ERP</span>
-                        </div>
-                        <div style="font-size:11px; margin-bottom:6px; color:#8b949e;">
-                            <a href="https://anvaya.mlritm.ac.in/App/StudentProfile" target="_blank" style="color:#64b5f6; text-decoration:none;">🔗 Open Anvaya ERP Profile</a>
-                        </div>
-                    `}
+                    ` : ''}
                     <div style="font-size:12px; margin-bottom:2px; color:#8b949e; border-top:1px solid #2a2a2a; padding-top:4px;">
                         <strong style="color:#aaa;">🏛️ College Campus:</strong> MLRITM, Dundigal, Hyderabad - 500043
                     </div>
