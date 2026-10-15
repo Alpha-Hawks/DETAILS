@@ -592,11 +592,550 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        /* ==================== View Mode Control & Mobile/Desktop Adaptations ==================== */
+        .header-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .view-mode-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 20px;
+            padding: 3px 6px;
+        }
+
+        .view-pill {
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            padding: 4px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .view-pill:hover {
+            color: #c9d1d9;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .view-pill.active {
+            background: #1f6feb;
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(31, 111, 235, 0.4);
+        }
+
+        .view-status-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #21262d;
+            color: #79c0ff;
+            font-weight: 500;
+            margin-left: 2px;
+            white-space: nowrap;
+        }
+
+        .floating-view-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: rgba(22, 27, 34, 0.94);
+            border: 1px solid #388bfd;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(56, 139, 253, 0.35);
+            backdrop-filter: blur(8px);
+            color: #e6edf3;
+            padding: 8px 14px;
+            border-radius: 24px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            outline: none;
+        }
+
+        .floating-view-toggle:hover {
+            transform: translateY(-2px);
+            background: #1f6feb;
+            color: #fff;
+            box-shadow: 0 10px 28px rgba(31, 111, 235, 0.5);
+        }
+
+        /* Phone frame preview on desktop when Mobile View is forced */
+        @media (min-width: 769px) {
+            body.force-mobile-view {
+                background: #04070b;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 10px;
+            }
+            body.force-mobile-view .header,
+            body.force-mobile-view .container {
+                max-width: 440px;
+                width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            body.force-mobile-view .container {
+                border: 2px solid #30363d;
+                border-radius: 28px;
+                padding: 14px 12px;
+                background: #0d1117;
+                box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(88, 166, 255, 0.15);
+            }
+            body.force-mobile-view .mobile-frame-notch {
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+                margin: 0 auto 10px;
+                width: 120px;
+                height: 18px;
+                background: #000;
+                border-radius: 12px;
+            }
+            body.force-mobile-view .notch-speaker {
+                width: 40px;
+                height: 4px;
+                background: #30363d;
+                border-radius: 2px;
+            }
+            body.force-mobile-view .notch-camera {
+                width: 8px;
+                height: 8px;
+                background: #161b22;
+                border: 1px solid #30363d;
+                border-radius: 50%;
+            }
+        }
+
+        /* Mobile View Rules: active on screens <= 768px (unless forced desktop) OR when forced mobile */
+        @media (max-width: 768px) {
+            body:not(.force-desktop-view) {
+                padding: 10px 8px;
+            }
+            body:not(.force-desktop-view) .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                margin-bottom: 12px;
+                padding-bottom: 10px;
+            }
+            body:not(.force-desktop-view) .header-main {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            body:not(.force-desktop-view) .header h1 {
+                font-size: 20px;
+                text-align: center;
+                justify-content: center;
+            }
+            body:not(.force-desktop-view) .view-mode-bar {
+                justify-content: center;
+                width: 100%;
+                margin-top: 4px;
+            }
+            body:not(.force-desktop-view) .nav-links {
+                display: flex;
+                overflow-x: auto;
+                gap: 6px;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            body:not(.force-desktop-view) .nav-links::-webkit-scrollbar {
+                display: none;
+            }
+            body:not(.force-desktop-view) .nav-links a,
+            body:not(.force-desktop-view) .nav-links button {
+                flex-shrink: 0;
+                padding: 6px 10px;
+                font-size: 11px;
+                white-space: nowrap;
+                margin-left: 0 !important;
+            }
+            body:not(.force-desktop-view) .tabs {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 6px;
+                margin-bottom: 14px;
+                padding-bottom: 6px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            body:not(.force-desktop-view) .tabs::-webkit-scrollbar {
+                display: none;
+            }
+            body:not(.force-desktop-view) .tab-btn {
+                flex-shrink: 0;
+                padding: 7px 12px;
+                font-size: 12px;
+                border-radius: 18px;
+                white-space: nowrap;
+            }
+            body:not(.force-desktop-view) .tab-content {
+                padding: 14px 10px;
+                border-radius: 10px;
+                margin-bottom: 16px;
+            }
+            body:not(.force-desktop-view) .tab-content h2 {
+                font-size: 17px !important;
+            }
+            body:not(.force-desktop-view) .form-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            body:not(.force-desktop-view) .search-mode-selector {
+                display: flex;
+                overflow-x: auto;
+                gap: 6px;
+                margin-bottom: 12px;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            body:not(.force-desktop-view) .search-mode-selector::-webkit-scrollbar {
+                display: none;
+            }
+            body:not(.force-desktop-view) .mode-pill {
+                flex-shrink: 0;
+                padding: 5px 12px;
+                font-size: 11px;
+            }
+            body:not(.force-desktop-view) .quick-chip {
+                flex-shrink: 0;
+                font-size: 10px;
+                padding: 2px 8px;
+            }
+            body:not(.force-desktop-view) .profile-hero {
+                flex-direction: column;
+                gap: 14px;
+                padding: 14px 10px;
+                margin: 12px auto;
+                width: 100%;
+                text-align: center;
+            }
+            body:not(.force-desktop-view) .hero-img-wrap {
+                width: 120px;
+                height: 120px;
+            }
+            body:not(.force-desktop-view) .hero-details {
+                width: 100%;
+                text-align: left;
+            }
+            body:not(.force-desktop-view) .hero-details h3 {
+                text-align: center;
+                font-size: 17px;
+            }
+            body:not(.force-desktop-view) .hero-details .name {
+                text-align: center;
+                font-size: 14px;
+            }
+            body:not(.force-desktop-view) .hero-details p {
+                font-size: 12px;
+                word-break: break-word;
+            }
+            body:not(.force-desktop-view) .student-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+                margin-top: 14px;
+            }
+            body:not(.force-desktop-view) .student-card {
+                padding: 10px 6px;
+                border-radius: 10px;
+            }
+            body:not(.force-desktop-view) .student-img-wrap {
+                width: 95px;
+                height: 95px;
+                border-radius: 10px;
+                margin-bottom: 8px;
+            }
+            body:not(.force-desktop-view) .student-roll {
+                font-size: 12px;
+            }
+            body:not(.force-desktop-view) .student-name {
+                font-size: 11px !important;
+                margin: 2px 0 4px !important;
+                line-height: 1.2 !important;
+            }
+            body:not(.force-desktop-view) .student-badge {
+                font-size: 9px !important;
+                padding: 2px 5px !important;
+            }
+            body:not(.force-desktop-view) .student-actions {
+                display: flex;
+                gap: 4px;
+                width: 100%;
+                margin-top: 6px;
+            }
+            body:not(.force-desktop-view) .student-actions button,
+            body:not(.force-desktop-view) .student-actions a {
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+                flex: 1;
+                text-align: center;
+            }
+            body:not(.force-desktop-view) .gender-toggle {
+                display: flex;
+                gap: 4px;
+                width: 100%;
+            }
+            body:not(.force-desktop-view) .gender-opt {
+                flex: 1;
+                text-align: center;
+                padding: 6px 4px;
+                font-size: 11px;
+            }
+            body:not(.force-desktop-view) .modal-overlay {
+                padding: 10px 6px;
+                align-items: center;
+            }
+            body:not(.force-desktop-view) .modal-box {
+                width: 100%;
+                max-width: 100%;
+                max-height: 94vh;
+                border-radius: 14px;
+                padding: 14px 10px;
+            }
+        }
+
+        /* Applied when user forces Mobile View regardless of viewport width */
+        body.force-mobile-view .header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+        }
+        body.force-mobile-view .header-main {
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        body.force-mobile-view .header h1 {
+            font-size: 20px;
+            text-align: center;
+            justify-content: center;
+        }
+        body.force-mobile-view .view-mode-bar {
+            justify-content: center;
+            width: 100%;
+            margin-top: 4px;
+        }
+        body.force-mobile-view .nav-links {
+            display: flex;
+            overflow-x: auto;
+            gap: 6px;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        body.force-mobile-view .nav-links::-webkit-scrollbar {
+            display: none;
+        }
+        body.force-mobile-view .nav-links a,
+        body.force-mobile-view .nav-links button {
+            flex-shrink: 0;
+            padding: 6px 10px;
+            font-size: 11px;
+            white-space: nowrap;
+            margin-left: 0 !important;
+        }
+        body.force-mobile-view .tabs {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 6px;
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        body.force-mobile-view .tabs::-webkit-scrollbar {
+            display: none;
+        }
+        body.force-mobile-view .tab-btn {
+            flex-shrink: 0;
+            padding: 7px 12px;
+            font-size: 12px;
+            border-radius: 18px;
+            white-space: nowrap;
+        }
+        body.force-mobile-view .tab-content {
+            padding: 14px 10px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+        body.force-mobile-view .tab-content h2 {
+            font-size: 17px !important;
+        }
+        body.force-mobile-view .form-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        body.force-mobile-view .search-mode-selector {
+            display: flex;
+            overflow-x: auto;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        body.force-mobile-view .search-mode-selector::-webkit-scrollbar {
+            display: none;
+        }
+        body.force-mobile-view .mode-pill {
+            flex-shrink: 0;
+            padding: 5px 12px;
+            font-size: 11px;
+        }
+        body.force-mobile-view .quick-chip {
+            flex-shrink: 0;
+            font-size: 10px;
+            padding: 2px 8px;
+        }
+        body.force-mobile-view .profile-hero {
+            flex-direction: column;
+            gap: 14px;
+            padding: 14px 10px;
+            margin: 12px auto;
+            width: 100%;
+            text-align: center;
+        }
+        body.force-mobile-view .hero-img-wrap {
+            width: 120px;
+            height: 120px;
+        }
+        body.force-mobile-view .hero-details {
+            width: 100%;
+            text-align: left;
+        }
+        body.force-mobile-view .hero-details h3 {
+            text-align: center;
+            font-size: 17px;
+        }
+        body.force-mobile-view .hero-details .name {
+            text-align: center;
+            font-size: 14px;
+        }
+        body.force-mobile-view .hero-details p {
+            font-size: 12px;
+            word-break: break-word;
+        }
+        body.force-mobile-view .student-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+        body.force-mobile-view .student-card {
+            padding: 10px 6px;
+            border-radius: 10px;
+        }
+        body.force-mobile-view .student-img-wrap {
+            width: 95px;
+            height: 95px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        body.force-mobile-view .student-roll {
+            font-size: 12px;
+        }
+        body.force-mobile-view .student-name {
+            font-size: 11px !important;
+            margin: 2px 0 4px !important;
+            line-height: 1.2 !important;
+        }
+        body.force-mobile-view .student-badge {
+            font-size: 9px !important;
+            padding: 2px 5px !important;
+        }
+        body.force-mobile-view .student-actions {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+            margin-top: 6px;
+        }
+        body.force-mobile-view .student-actions button,
+        body.force-mobile-view .student-actions a {
+            padding: 4px 6px !important;
+            font-size: 10px !important;
+            flex: 1;
+            text-align: center;
+        }
+        body.force-mobile-view .gender-toggle {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+        }
+        body.force-mobile-view .gender-opt {
+            flex: 1;
+            text-align: center;
+            padding: 6px 4px;
+            font-size: 11px;
+        }
+        body.force-mobile-view .modal-overlay {
+            padding: 10px 6px;
+            align-items: center;
+        }
+        body.force-mobile-view .modal-box {
+            width: 100%;
+            max-width: 100%;
+            max-height: 94vh;
+            border-radius: 14px;
+            padding: 14px 10px;
+        }
+
+        /* Applied when user explicitly forces Desktop View on mobile */
+        body.force-desktop-view {
+            min-width: 1024px;
+            overflow-x: auto;
+        }
+        body.force-desktop-view .header,
+        body.force-desktop-view .container {
+            min-width: 980px;
+        }
     </style>
 </head>
 <body>
+    <!-- Desktop Phone Notch Indicator (visible only when mobile view is forced on desktop) -->
+    <div class="mobile-frame-notch" id="mobileFrameNotch" style="display: none;">
+        <span class="notch-speaker"></span>
+        <span class="notch-camera"></span>
+    </div>
+
     <div class="header">
-        <h1>🎓 MLRITM Student Hub</h1>
+        <div class="header-main">
+            <h1>🎓 MLRITM Student Hub</h1>
+            <div class="view-mode-bar" role="group" aria-label="Switch between Desktop and Mobile View">
+                <button type="button" class="view-pill active" id="viewPill-auto" onclick="setViewMode('auto')" title="Automatically adapt layout based on screen width">⚡ Auto</button>
+                <button type="button" class="view-pill" id="viewPill-mobile" onclick="setViewMode('mobile')" title="Force mobile layout">📱 Mobile View</button>
+                <button type="button" class="view-pill" id="viewPill-desktop" onclick="setViewMode('desktop')" title="Force desktop layout">💻 Desktop View</button>
+                <span class="view-status-badge" id="viewStatusBadge">Auto: Mobile</span>
+            </div>
+        </div>
         <div class="nav-links">
             <a id="navChoose" href="index.html">← Choose Portal</a>
             <a id="navRoll" href="pages/rollnumberfinished.html">Roll Generator</a>
@@ -887,6 +1426,121 @@
     <script src="scripts/erp_registry.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/erp_registry.js'; document.head.appendChild(s);"></script>
     <script src="scripts/attendance_tracker.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/attendance_tracker.js'; document.head.appendChild(s);"></script>
     <script>
+        // ==================== Automatic Device Detection & View Mode Switcher ====================
+        let currentViewMode = 'auto'; // 'auto' | 'mobile' | 'desktop'
+
+        function detectDeviceType() {
+            const isNarrow = window.innerWidth <= 768;
+            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '');
+            return (isNarrow || isMobileUA) ? 'mobile' : 'desktop';
+        }
+
+        function setViewMode(mode, save = true) {
+            currentViewMode = mode;
+            if (save) {
+                try {
+                    localStorage.setItem('mlritm_view_mode', mode);
+                } catch(e) {}
+            }
+
+            const detected = detectDeviceType();
+            const effective = (mode === 'auto') ? detected : mode;
+
+            // Update mode pills in header
+            ['auto', 'mobile', 'desktop'].forEach(m => {
+                const pill = document.getElementById('viewPill-' + m);
+                if (pill) {
+                    if (m === mode) pill.classList.add('active');
+                    else pill.classList.remove('active');
+                }
+            });
+
+            // Update badge text
+            const badge = document.getElementById('viewStatusBadge');
+            if (badge) {
+                if (mode === 'auto') {
+                    badge.textContent = effective === 'mobile' ? 'Auto: Mobile 📱' : 'Auto: Desktop 💻';
+                    badge.style.color = '#79c0ff';
+                } else if (mode === 'mobile') {
+                    badge.textContent = 'Forced: Mobile 📱';
+                    badge.style.color = '#ffb74d';
+                } else {
+                    badge.textContent = 'Forced: Desktop 💻';
+                    badge.style.color = '#7ee787';
+                }
+            }
+
+            // Update body classes
+            const body = document.body;
+            body.classList.remove('is-mobile-view', 'is-desktop-view', 'force-mobile-view', 'force-desktop-view');
+
+            if (mode === 'mobile') {
+                body.classList.add('is-mobile-view', 'force-mobile-view');
+            } else if (mode === 'desktop') {
+                body.classList.add('is-desktop-view', 'force-desktop-view');
+            } else {
+                if (detected === 'mobile') {
+                    body.classList.add('is-mobile-view');
+                } else {
+                    body.classList.add('is-desktop-view');
+                }
+            }
+
+            // Update floating button
+            const floatIcon = document.getElementById('floatingToggleIcon');
+            const floatText = document.getElementById('floatingToggleText');
+            if (floatIcon && floatText) {
+                if (mode === 'auto') {
+                    floatIcon.textContent = effective === 'mobile' ? '📱' : '💻';
+                    floatText.textContent = effective === 'mobile' ? 'Mobile View' : 'Desktop View';
+                } else if (mode === 'mobile') {
+                    floatIcon.textContent = '📱';
+                    floatText.textContent = 'Mobile (Locked)';
+                } else {
+                    floatIcon.textContent = '💻';
+                    floatText.textContent = 'Desktop (Locked)';
+                }
+            }
+
+            // Update mobile frame notch visibility on desktop
+            const notch = document.getElementById('mobileFrameNotch');
+            if (notch) {
+                notch.style.display = (mode === 'mobile' && window.innerWidth > 768) ? 'flex' : 'none';
+            }
+        }
+
+        function cycleViewMode() {
+            const nextMode = currentViewMode === 'auto' ? 'mobile' : (currentViewMode === 'mobile' ? 'desktop' : 'auto');
+            setViewMode(nextMode);
+        }
+
+        function initViewModeSystem() {
+            let saved = 'auto';
+            try {
+                saved = localStorage.getItem('mlritm_view_mode') || 'auto';
+            } catch(e) {}
+
+            setViewMode(saved, false);
+
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    if (currentViewMode === 'auto') {
+                        setViewMode('auto', false);
+                    } else if (currentViewMode === 'mobile') {
+                        const notch = document.getElementById('mobileFrameNotch');
+                        if (notch) {
+                            notch.style.display = (window.innerWidth > 768) ? 'flex' : 'none';
+                        }
+                    }
+                }, 80);
+            });
+        }
+
+        // Initialize immediately
+        initViewModeSystem();
+
         // Adjust navigation links based on current path
         (function() {
             window.addEventListener('DOMContentLoaded', function() {
@@ -2221,5 +2875,11 @@ ${d3} P P P A P P P
             runAttendanceCalc();
         });
     </script>
+
+    <!-- Floating View Mode Quick-Toggle -->
+    <button type="button" class="floating-view-toggle" id="floatingViewToggle" onclick="cycleViewMode()" title="Click to cycle view modes (Auto / Mobile / Desktop)">
+        <span id="floatingToggleIcon">📱</span>
+        <span id="floatingToggleText">Mobile View</span>
+    </button>
 </body>
 </html>
