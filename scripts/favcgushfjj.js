@@ -1421,6 +1421,7 @@ function appendAdditionalLinks(container, rollNumber) {
         const branchName = branchMap[branchCode] || `Branch ${branchCode}`;
         const db = (typeof window !== 'undefined' && window.MLRITM_STUDENTS) ? window.MLRITM_STUDENTS[upperRoll] : null;
         const knownName = (db && db.name) ? db.name : null;
+        const email = (db && db.email) ? db.email : `${upperRoll}@mlritm.ac.in`;
 
         additionalLinksContainer.innerHTML = `
             <div style="background:#222; border:1px solid #00d9ff; border-radius:8px; padding:12px; margin-top:8px; text-align:left; font-size:13px; color:#eee; width:100%; box-sizing:border-box;">
@@ -1431,9 +1432,10 @@ function appendAdditionalLinks(container, rollNumber) {
                 <div style="margin-bottom:4px;"><strong>Branch:</strong> ${branchName}</div>
                 <div style="margin-bottom:4px;"><strong>Batch:</strong> ${joinYear} - ${joinYear + 4}</div>
                 <div style="margin-bottom:6px;"><strong>College:</strong> MLRITM</div>
-                <div style="margin-top:8px; display:flex; gap:6px;">
+                <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
                     <a href="https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${upperRoll}.jpg" target="_blank" style="padding:4px 8px; background:#007bff; color:#fff; border-radius:4px; text-decoration:none; font-size:12px;">Full Photo</a>
                     <button type="button" onclick="navigator.clipboard.writeText('${email}'); alert('Email copied!');" style="padding:4px 8px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer; font-size:12px;">Copy Email</button>
+                    <button type="button" onclick="if(typeof openErpMenu==='function'){openErpMenu('${upperRoll}')}else{window.open('https://anvaya.mlritm.ac.in/App','_blank')}" style="padding:4px 8px; background:#238636; color:#fff; border:1px solid #2ea043; border-radius:4px; cursor:pointer; font-size:12px; font-weight:600;">🏛️ ERP Portal</button>
                 </div>
             </div>
         `;

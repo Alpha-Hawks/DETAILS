@@ -162,6 +162,64 @@ window.getStudentByInstagram = function(queryHandle) {
     return null;
 };
 
+window.getStudentsByName = function(queryName, maxResults = 80) {
+    if (!queryName || typeof queryName !== 'string') return [];
+    const q = queryName.trim().toUpperCase();
+    if (!q || q.length < 2) return [];
+
+    const db = window.MLRITM_STUDENTS;
+    if (!db) return [];
+
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const results = [];
+
+    for (const [roll, data] of Object.entries(db)) {
+        if (!data || !data.name) continue;
+        const name = String(data.name).trim().toUpperCase();
+
+        let matches = true;
+        for (let i = 0; i < tokens.length; i++) {
+            if (!name.includes(tokens[i])) {
+                matches = false;
+                break;
+            }
+        }
+        if (!matches) continue;
+
+        let score = 0;
+        if (name === q) {
+            score += 1000;
+        } else if (name.startsWith(q)) {
+            score += 500;
+        } else if (name.includes(' ' + q)) {
+            score += 300;
+        } else {
+            const nameWords = name.split(/\s+/);
+            if (nameWords.some(w => w === tokens[0])) {
+                score += 200;
+            } else if (nameWords.some(w => w.startsWith(tokens[0]))) {
+                score += 100;
+            } else {
+                score += 50;
+            }
+        }
+
+        results.push({
+            rollNumber: roll,
+            student: data,
+            score: score
+        });
+    }
+
+    results.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        if (a.student.name !== b.student.name) return a.student.name.localeCompare(b.student.name);
+        return a.rollNumber.localeCompare(b.rollNumber);
+    });
+
+    return results.slice(0, maxResults);
+};
+
 window.getStudentInstagram = function(roll) {
     if (!roll) return null;
     const cleanRoll = String(roll).trim().toUpperCase();

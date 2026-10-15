@@ -7,8 +7,12 @@
     <link rel="stylesheet" href="../styles/belts2.css">
 </head>
 <body>
-    <div id="headerContainer">
-        <h1 id="exampleHeading">Image Gallery</h1>
+    <div id="headerContainer" style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 900px; margin: 0 auto 15px; flex-wrap: wrap; gap: 10px;">
+        <h1 id="exampleHeading" style="margin: 0;">Image Gallery</h1>
+        <div style="display: flex; gap: 8px;">
+            <a href="../mlritm.html" style="color: #c9d1d9; background: #21262d; border: 1px solid #30363d; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 13px;">← MLRITM Hub</a>
+            <button type="button" onclick="openErpMenu()" style="background: #238636; border: 1px solid #2ea043; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">🏛️ Anvaya ERP</button>
+        </div>
     </div>
 
     <div id="selectContainer" style="display: block; margin-top: 20px; text-align: center;">
@@ -42,6 +46,7 @@
                 </select>
                 <br>
                 <button type="button" id="showSelectedBtn">Show Selected Values</button>
+                <button type="button" id="erpPortalBtn" onclick="openErpMenu()" style="background:#238636; border:1px solid #2ea043; color:#fff; padding:10px 18px; border-radius:5px; font-size:16px; font-weight:600; cursor:pointer; margin-left:10px;">🏛️ Anvaya ERP</button>
             </form></center>
             <center><p id="imageCount">Total Images: 0</p> </center>
             <div id="notfound"></div>
@@ -58,6 +63,8 @@
 
     <p id="result"></p>
 
+    <script src="../scripts/mlritm_db.js" defer></script>
+    <script src="../scripts/erp_registry.js" defer></script>
     <script src="../scripts/favcgushfjj.js" defer></script>
     <script src="../scripts/apas.js" defer></script>
 </body>

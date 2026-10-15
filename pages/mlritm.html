@@ -6,6 +6,9 @@
     <title>MLRITM | Student Search & Image Gallery</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Student photos are served from Anvaya: open the connection early so photos start downloading sooner -->
+    <link rel="preconnect" href="https://anvaya.mlritm.ac.in">
+    <link rel="dns-prefetch" href="https://anvaya.mlritm.ac.in">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -212,7 +215,7 @@
         .student-img-wrap {
             width: 140px;
             height: 140px;
-            border-radius: 50%;
+            border-radius: 12px;
             overflow: hidden;
             margin-bottom: 14px;
             border: 3px solid #30363d;
@@ -226,11 +229,99 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s;
+            transition: transform 0.3s, opacity 0.25s ease;
         }
 
         .student-card:hover .student-img {
             transform: scale(1.08);
+        }
+
+        /* Photo loading: shimmer placeholder; photo fades in only once fully downloaded + decoded,
+           so half-painted photos are never shown */
+        .student-img.pending {
+            opacity: 0;
+        }
+
+        .student-img-wrap.is-loading {
+            background: linear-gradient(90deg, #161b22 25%, #262c36 50%, #161b22 75%);
+            background-size: 200% 100%;
+            animation: imgShimmer 1.2s ease-in-out infinite;
+        }
+
+        .student-img-wrap.no-photo::after {
+            content: 'No Photo';
+            font-size: 12px;
+            color: #6e7681;
+        }
+
+        @keyframes imgShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Gender filter (segmented control) */
+        .gender-toggle {
+            display: flex;
+            gap: 4px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .form-group .gender-opt {
+            flex: 1;
+            position: relative;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        .gender-opt input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .gender-opt span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8b949e;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .gender-opt span em {
+            font-style: normal;
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .gender-opt:hover span {
+            color: #e6edf3;
+            background: #161b22;
+        }
+
+        .gender-opt input:checked + span {
+            background: #238636;
+            color: #fff;
+        }
+
+        .gender-opt.male input:checked + span {
+            background: #1f6feb;
+        }
+
+        .gender-opt.female input:checked + span {
+            background: #bf3989;
+        }
+
+        .gender-opt input:focus-visible + span {
+            box-shadow: 0 0 0 2px #58a6ff;
         }
 
         .student-roll {
@@ -353,7 +444,55 @@
             color: #e6edf3;
         }
 
+        /* Search Mode Selection Pills for Tab 1 */
+        .mode-pill {
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .mode-pill:hover {
+            border-color: #58a6ff;
+            color: #c9d1d9;
+            background: #21262d;
+        }
+
+        .mode-pill.active {
+            background: rgba(56, 139, 253, 0.15);
+            border-color: #388bfd;
+            color: #58a6ff;
+            font-weight: 600;
+            box-shadow: 0 0 0 1px rgba(56, 139, 253, 0.2);
+        }
+
+        .quick-chip {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #79c0ff;
+            border-radius: 12px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            outline: none;
+        }
+
+        .quick-chip:hover {
+            border-color: #58a6ff;
+            background: #30363d;
+            color: #ffffff;
+        }
+
         /* Modal */
+        /* Modal Overlay & Scroll-Safe Dialog */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -361,11 +500,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 20px 14px;
+            overflow-y: auto;
         }
 
         .modal-overlay.active {
@@ -375,27 +516,65 @@
         .modal-box {
             background: #161b22;
             border: 1px solid #30363d;
-            border-radius: 12px;
-            max-width: 500px;
+            border-radius: 14px;
+            max-width: 520px;
             width: 100%;
-            padding: 24px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
             position: relative;
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+            overflow: hidden;
+            margin: auto;
+        }
+
+        #modalContent {
+            overflow-y: auto;
+            padding: 24px 20px 20px;
+            overscroll-behavior: contain;
+        }
+
+        #modalContent::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #modalContent::-webkit-scrollbar-track {
+            background: #0d1117;
+            border-radius: 4px;
+        }
+
+        #modalContent::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        #modalContent::-webkit-scrollbar-thumb:hover {
+            background: #58a6ff;
         }
 
         .modal-close {
             position: absolute;
-            top: 14px;
-            right: 16px;
-            background: none;
-            border: none;
+            top: 12px;
+            right: 14px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #8b949e;
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
+            z-index: 20;
+            transition: all 0.2s;
         }
 
         .modal-close:hover {
             color: #fff;
+            background: #da3633;
+            border-color: #f85149;
         }
 
         /* Spinner */
@@ -606,15 +785,39 @@
             <button class="tab-btn" onclick="switchTab('instagram')">📸 Instagram & Mobile Finder</button>
             <button class="tab-btn" onclick="switchTab('html')">Portal HTML Extractor</button>
             <button class="tab-btn" onclick="switchTab('erp')">🏛 ERP & Academic Services</button>
+            <button class="tab-btn" onclick="switchTab('attendance')">📊 Student Attendance Tracker</button>
         </div>
 
         <!-- Tab 1: Single Student Search -->
         <div id="tab-single" class="tab-content active">
-            <h2 style="font-size: 18px; margin-bottom: 12px; color: #58a6ff;">Search Student by Roll Number or Mobile Number</h2>
-            <div style="display: flex; gap: 12px; max-width: 500px;">
-                <input type="text" id="singleRollInput" class="form-control" placeholder="" value="" onkeydown="if(event.key === 'Enter') searchSingleStudent()">
-                <button class="btn-primary" onclick="searchSingleStudent()">Search</button>
+            <h2 style="font-size: 20px; margin-bottom: 6px; color: #58a6ff;">Search Student by Roll Number, Mobile Number, or Name</h2>
+            <p style="font-size: 13px; color: #8b949e; margin-bottom: 14px;">Instant directory search across 4,180+ enrolled students. Search by Roll Number, 10-digit Phone, or Student Name.</p>
+
+            <!-- Search Mode Selection Pills -->
+            <div class="search-mode-selector" style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;" role="group" aria-label="Search mode">
+                <button type="button" class="mode-pill active" id="modeBtn-auto" onclick="setSingleSearchMode('auto')">⚡ Auto-Detect</button>
+                <button type="button" class="mode-pill" id="modeBtn-name" onclick="setSingleSearchMode('name')">👤 Find by Name</button>
+                <button type="button" class="mode-pill" id="modeBtn-roll" onclick="setSingleSearchMode('roll')">🆔 Roll Number</button>
+                <button type="button" class="mode-pill" id="modeBtn-mobile" onclick="setSingleSearchMode('mobile')">📱 Mobile Number</button>
             </div>
+
+            <!-- Search Input Box -->
+            <div style="display: flex; gap: 10px; max-width: 640px;">
+                <input type="text" id="singleRollInput" class="form-control" placeholder="Enter Roll Number, Mobile, or Student Name (e.g., Varun)..." value="" onkeydown="if(event.key === 'Enter') searchSingleStudent()" autocomplete="off">
+                <button class="btn-primary" onclick="searchSingleStudent()" style="white-space: nowrap; padding: 10px 18px;">Search</button>
+                <button class="btn-card" onclick="clearSingleStudentSearch()" style="white-space: nowrap; padding: 10px 14px;">Clear</button>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div style="display: flex; gap: 6px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
+                <span style="font-size: 11px; color: #8b949e;">Quick try:</span>
+                <button type="button" class="quick-chip" onclick="quickSearchSingle('Varun', 'name')">Varun</button>
+                <button type="button" class="quick-chip" onclick="quickSearchSingle('Charitha', 'name')">Charitha</button>
+                <button type="button" class="quick-chip" onclick="quickSearchSingle('Sameer', 'name')">Sameer</button>
+                <button type="button" class="quick-chip" onclick="quickSearchSingle('Medoju Varun', 'name')">Medoju Varun</button>
+                <button type="button" class="quick-chip" onclick="quickSearchSingle('227Y1A0222', 'roll')">227Y1A0222</button>
+            </div>
+
             <div id="singleResultContainer"></div>
         </div>
 
@@ -640,7 +843,7 @@
 
         <!-- Tab 3: Quick Branch Browser -->
         <div id="tab-branch" class="tab-content">
-            <h2 style="font-size: 18px; margin-bottom: 12px; color: #58a6ff;">Quick Section / Branch Selector</h2>
+            <h2 style="font-size: 18px; margin-bottom: 12px; color: #58a6ff;">Quick Branch Selector</h2>
             <div class="form-grid">
                 <div class="form-group">
                     <label for="branchYear">Admission Year / Batch:</label>
@@ -666,16 +869,19 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="branchSection">Section Range:</label>
-                    <select id="branchSection" class="form-control">
-                        <option value="01-64">Section A (01 - 64)</option>
-                        <option value="65-C8">Section B (65 - C8)</option>
-                        <option value="C9-K2">Section C (C9 - K2)</option>
-                        <option value="01-75" selected>First 75 Students (01 - 75)</option>
-                    </select>
+                    <label>Gender:</label>
+                    <div class="gender-toggle" role="radiogroup" aria-label="Filter students by gender">
+                        <label class="gender-opt"><input type="radio" name="branchGender" id="genderAll" value="all" checked onchange="onGenderChange()"><span>All <em id="genderCountAll"></em></span></label>
+                        <label class="gender-opt male"><input type="radio" name="branchGender" id="genderMale" value="Male" onchange="onGenderChange()"><span>👦 Male <em id="genderCountMale"></em></span></label>
+                        <label class="gender-opt female"><input type="radio" name="branchGender" id="genderFemale" value="Female" onchange="onGenderChange()"><span>👧 Female <em id="genderCountFemale"></em></span></label>
+                    </div>
                 </div>
             </div>
-            <button class="btn-primary" onclick="loadSelectedSection()">Load Class Images</button>
+            <button class="btn-primary" id="btnLoadClass" onclick="loadSelectedSection()">Load Class Images</button>
+            <div class="status-bar">
+                <span id="branchStatus">Choose batch, branch and gender, then click Load Class Images.</span>
+                <span id="branchCount">Total: 0</span>
+            </div>
         </div>
 
         <!-- Tab 4: Portal HTML Extractor -->
@@ -773,6 +979,104 @@
             </div>
         </div>
 
+        <!-- Tab 7: Student Attendance Tracker -->
+        <div id="tab-attendance" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+                <h2 style="font-size: 18px; color: #58a6ff; display: flex; align-items: center; gap: 8px;">
+                    <span>📊 MLRITM Student Attendance Tracker & Daywise Log</span>
+                </h2>
+                <a href="https://mlritmexams.com/BeesERP/Login.aspx" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: #58a6ff; text-decoration: none; border: 1px solid #388bfd; padding: 5px 12px; border-radius: 6px; background: #21262d; font-weight: 500;">
+                    Official BeesERP Portal ↗
+                </a>
+            </div>
+
+            <!-- Attendance Info Banner -->
+            <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px 18px; margin-bottom: 18px; font-size: 12px; color: #8b949e; line-height: 1.6;">
+                <div style="display: flex; align-items: center; gap: 8px; color: #e6edf3; font-weight: 600; margin-bottom: 4px;">
+                    <span style="color: #2ea043;">✔</span> Verified BeesERP Attendance Integration (Source: MLRITM-Hyderabad-Attendance-Tracking-Application)
+                </div>
+                <div>
+                    Based on the native Android application architecture by Smustafa8152. Tracks day-wise period attendance (<code style="color:#7ee787;">ctl00_cpStud_grdDaywise</code>) and total percentage (<code style="color:#7ee787;">ctl00_cpStud_lblTotalPercentage</code>) on BeesERP (<code style="color:#58a6ff;">mlritmexams.com</code>). Enter your class numbers below to calculate safe bunk margins or paste your daywise table to view period logs.
+                </div>
+            </div>
+
+            <!-- Absent Today Alert Container -->
+            <div id="attendanceAbsentAlert" style="display:none; margin-bottom:18px;"></div>
+
+            <!-- Two-Column Grid: Calculator & Parser -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-bottom: 24px;">
+                
+                <!-- Card 1: Attendance & Condonation Calculator -->
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px;">
+                    <h3 style="font-size: 15px; color: #58a6ff; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+                        <span>🧮 Smart Attendance & Condonation Calculator</span>
+                    </h3>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                        <div class="form-group">
+                            <label for="attTotalClasses">Total Classes Held:</label>
+                            <input type="number" id="attTotalClasses" class="form-control" placeholder="e.g. 120" value="120" oninput="runAttendanceCalc()">
+                        </div>
+                        <div class="form-group">
+                            <label for="attAttendedClasses">Classes Attended:</label>
+                            <input type="number" id="attAttendedClasses" class="form-control" placeholder="e.g. 96" value="96" oninput="runAttendanceCalc()">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="attTargetPct">Target Threshold Percentage (%):</label>
+                        <select id="attTargetPct" class="form-control" onchange="runAttendanceCalc()">
+                            <option value="75" selected>75% (Mandatory University Criterion)</option>
+                            <option value="80">80% (Safe Buffer)</option>
+                            <option value="85">85% (Distinction Goal)</option>
+                            <option value="65">65% (Minimum Condonation Cut-off)</option>
+                        </select>
+                    </div>
+
+                    <!-- Live Calculation Result Card -->
+                    <div id="attCalcResultBox" style="background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:14px; margin-top:12px;"></div>
+                </div>
+
+                <!-- Card 2: BeesERP Daywise Attendance Parser -->
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <h3 style="font-size: 15px; color: #79c0ff; display:flex; align-items:center; gap:6px; margin:0;">
+                            <span>📋 Daywise Attendance Parser</span>
+                        </h3>
+                        <button type="button" onclick="loadSampleAttendanceData()" style="background:#21262d; border:1px solid #30363d; color:#58a6ff; font-size:11px; padding:3px 8px; border-radius:4px; cursor:pointer;">
+                            Load Sample Data
+                        </button>
+                    </div>
+                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">
+                        Paste the text or HTML copied from BeesERP Daywise Grid (<code style="color:#aaa;">ctl00_cpStud_grdDaywise</code>):
+                    </p>
+                    <textarea id="beesRawInput" class="form-control" style="min-height: 110px; font-size:12px;" placeholder="Paste BeesERP table or text (e.g. 14/10/2026(Wed) P P A P P P P)..."></textarea>
+                    <div style="margin-top: 10px; display:flex; gap:10px;">
+                        <button class="btn-primary" onclick="parseAndDisplayAttendance()" style="padding:8px 16px; font-size:13px;">
+                            Parse Daywise Attendance
+                        </button>
+                        <button type="button" onclick="clearAttendanceInput()" style="background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:6px; padding:8px 14px; font-size:13px; cursor:pointer;">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parsed Daywise Attendance Table View -->
+            <div id="daywiseTableContainer" style="display:none; background:#161b22; border:1px solid #30363d; border-radius:10px; padding:20px; margin-bottom:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1px solid #30363d; padding-bottom:10px;">
+                    <div>
+                        <h3 id="daywiseStudentTitle" style="font-size:16px; color:#58a6ff; margin:0;">Daywise Period Attendance Log</h3>
+                        <div id="daywiseStudentSubtitle" style="font-size:12px; color:#8b949e; margin-top:2px;"></div>
+                    </div>
+                    <div id="daywiseSummaryStats" style="display:flex; gap:12px; font-size:13px;"></div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table id="daywiseGridTable" style="width:100%; border-collapse:collapse; font-size:13px; text-align:center;">
+                        <!-- Generated by JS -->
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Gallery / Results Section -->
         <div class="results-section">
             <div id="gallerySpinner" class="spinner"></div>
@@ -790,6 +1094,8 @@
 
     <script src="scripts/mlritm_db.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/mlritm_db.js'; document.head.appendChild(s);"></script>
     <script src="scripts/erp_routes.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/erp_routes.js'; document.head.appendChild(s);"></script>
+    <script src="scripts/erp_registry.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/erp_registry.js'; document.head.appendChild(s);"></script>
+    <script src="scripts/attendance_tracker.js" onerror="this.onerror=null; var s=document.createElement('script'); s.src='../scripts/attendance_tracker.js'; document.head.appendChild(s);"></script>
     <script>
         // Adjust navigation links based on current path
         (function() {
@@ -837,6 +1143,8 @@
             const name = (db && db.name) ? db.name : (knownStudents[cleanRoll]?.name || null);
             const address = (typeof window.getStudentAddress === 'function') ? window.getStudentAddress(cleanRoll) : null;
             const instagram = (typeof window.getStudentInstagram === 'function') ? window.getStudentInstagram(cleanRoll) : null;
+            const caste = (db && db.caste && db.caste.trim()) ? db.caste.trim() : null;
+            const admissionCategory = (db && db.cat && db.cat.trim()) ? db.cat.trim() : null;
 
             return {
                 rollNumber: cleanRoll,
@@ -847,6 +1155,8 @@
                 mother: db ? db.mother : null,
                 dob: db ? db.dob : null,
                 gender: db ? db.gender : null,
+                caste,
+                admissionCategory,
                 email,
                 branch,
                 batch: (db && db.batch) ? `${db.batch} - ${parseInt(db.batch, 10) + 4}` : `${joinYear} - ${joinYear + 4}`,
@@ -993,47 +1303,95 @@
             `;
         }
 
-        // Search single student (Supports Roll Number, Mobile Number, or Instagram Handle)
-        function searchSingleStudent() {
-            const rawInput = document.getElementById('singleRollInput').value.trim();
-            if (!rawInput) {
-                alert('Please enter a roll number, mobile number, or Instagram ID.');
-                return;
-            }
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
-            let roll = rawInput.toUpperCase();
-            const cleanDigits = rawInput.replace(/\D/g, '');
+        let currentSingleSearchMode = 'auto';
+        window._lastSearchResultsHtml = null;
 
-            // 1. Check if user entered a 10-digit mobile number
-            if (cleanDigits.length >= 10 && typeof window.getStudentByPhone === 'function') {
-                const phoneMatch = window.getStudentByPhone(cleanDigits);
-                if (phoneMatch) {
-                    roll = phoneMatch.rollNumber;
+        function setSingleSearchMode(mode) {
+            currentSingleSearchMode = mode;
+            ['auto', 'name', 'roll', 'mobile'].forEach(m => {
+                const btn = document.getElementById('modeBtn-' + m);
+                if (btn) {
+                    if (m === mode) btn.classList.add('active');
+                    else btn.classList.remove('active');
                 }
-            } else if ((rawInput.startsWith('@') || !rawInput.includes('7Y')) && typeof window.getStudentByInstagram === 'function') {
-                // 2. Check if user entered an Instagram handle
-                const igMatch = window.getStudentByInstagram(rawInput);
-                if (igMatch) {
-                    roll = igMatch.rollNumber;
-                }
-            }
+            });
 
+            const input = document.getElementById('singleRollInput');
+            if (input) {
+                if (mode === 'name') {
+                    input.placeholder = 'Enter Student Name (e.g., Varun, Sameer, Charitha)...';
+                } else if (mode === 'roll') {
+                    input.placeholder = 'Enter Roll Number (e.g., 227Y1A0222, 237Y1A1201)...';
+                } else if (mode === 'mobile') {
+                    input.placeholder = 'Enter 10-digit Mobile Number...';
+                } else {
+                    input.placeholder = 'Enter Roll Number, Mobile, or Student Name (e.g., Varun)...';
+                }
+                input.focus();
+            }
+        }
+
+        function clearSingleStudentSearch() {
+            const input = document.getElementById('singleRollInput');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            const container = document.getElementById('singleResultContainer');
+            if (container) container.innerHTML = '';
+            window._lastSearchResultsHtml = null;
+        }
+
+        function quickSearchSingle(val, mode) {
+            if (mode) setSingleSearchMode(mode);
+            const input = document.getElementById('singleRollInput');
+            if (input) {
+                input.value = val;
+                searchSingleStudent();
+            }
+        }
+
+        function renderSingleProfileCard(roll, bannerMsg) {
             const info = decodeRoll(roll);
             const container = document.getElementById('singleResultContainer');
-            container.innerHTML = `
+            if (!container) return;
+
+            let bannerHtml = '';
+            if (bannerMsg) {
+                bannerHtml = `
+                    <div style="max-width: 650px; margin: 16px auto 0; padding: 8px 14px; background: rgba(56, 139, 253, 0.12); border: 1px solid rgba(56, 139, 253, 0.35); border-radius: 8px; font-size: 12px; color: #79c0ff; display: flex; justify-content: space-between; align-items: center;">
+                        <span>ℹ️ ${escapeHtml(bannerMsg)}</span>
+                        ${window._lastSearchResultsHtml ? `<button class="btn-card" onclick="restoreNameSearchResults()" style="padding: 3px 8px; font-size: 11px;">← Back to Results</button>` : ''}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = bannerHtml + `
                 <div class="profile-hero">
                     <div class="hero-img-wrap">
                         <img src="${info.photoUrl}" alt="${info.rollNumber}" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/161b22/58a6ff?text=No+Photo';">
                     </div>
                     <div class="hero-details">
                         <h3>${info.rollNumber}</h3>
-                        ${info.name ? `<div class="name">${info.name}</div>` : ''}
+                        ${info.name ? `<div class="name">${escapeHtml(info.name)}</div>` : ''}
                         ${info.phone ? `<p><strong>Mobile:</strong> <a href="tel:${info.phone}" style="color:#58a6ff; text-decoration:none;">${info.phone}</a> <span style="background: #238636; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-left:4px;">VERIFIED PHONE</span></p>` : ''}
-                        ${info.father ? `<p><strong>Father Name:</strong> ${info.father} ${info.father_phone ? '(' + info.father_phone + ')' : ''}</p>` : ''}
+                        ${info.father ? `<p><strong>Father Name:</strong> ${escapeHtml(info.father)} ${info.father_phone ? '(' + info.father_phone + ')' : ''}</p>` : ''}
                         ${info.dob ? `<p><strong>DOB:</strong> ${info.dob} ${info.gender ? '(' + info.gender + ')' : ''}</p>` : ''}
-                        <p><strong>Branch:</strong> ${info.branch}</p>
+                        <p><strong>Branch:</strong> ${escapeHtml(info.branch)}</p>
                         <p><strong>Batch:</strong> ${info.batch}</p>
                         <p><strong>Email:</strong> <a href="mailto:${info.email}" style="color:#58a6ff;">${info.email}</a></p>
+                        ${info.caste ? `<p><strong>Caste / Community:</strong> <span style="background: #21262d; border: 1px solid #30363d; padding: 2px 8px; border-radius: 4px; color: #79c0ff; font-weight: 600;">${escapeHtml(info.caste)}</span></p>` : ''}
+                        ${info.admissionCategory ? `<p><strong>Admission Category:</strong> <span style="background: #21262d; border: 1px solid #30363d; padding: 2px 8px; border-radius: 4px; color: #7ee787; font-weight: 500;">${escapeHtml(info.admissionCategory)}</span></p>` : ''}
                         <p><strong>College:</strong> ${info.college}</p>
                         
                         ${renderInstagramBlock(info)}
@@ -1043,10 +1401,247 @@
                             <a href="${info.photoUrl}" target="_blank" class="btn-card primary" style="padding: 7px 14px;">Open Full Photo</a>
                             <button class="btn-card" onclick="navigator.clipboard.writeText('${info.email}'); alert('Email copied!');">Copy Email</button>
                             ${info.phone ? `<a href="tel:${info.phone}" class="btn-card" style="padding: 7px 14px; text-decoration:none;">Call Student</a>` : ''}
+                            <button class="btn-card" onclick="openModalForRoll('${info.rollNumber}')" style="padding: 7px 14px;">All Details Modal</button>
+                            <button class="btn-card" onclick="if(typeof openErpMenu==='function'){openErpMenu('${info.rollNumber}')}else{window.open('https://anvaya.mlritm.ac.in/App','_blank')}" style="background:#238636; border-color:#2ea043; color:#fff; padding:7px 14px; font-weight:600;">🏛️ ERP Portal</button>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        function renderNameSearchResults(matches, query) {
+            const container = document.getElementById('singleResultContainer');
+            if (!container) return;
+
+            const countText = matches.length >= 80 ? 'Showing first 80 matching students' : `Found ${matches.length} matching students`;
+            
+            let html = `
+                <div style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <span style="font-size: 14px; color: #58a6ff; font-weight: 600;">🔍 ${countText} for </span>
+                            <span style="font-size: 15px; color: #ffb74d; font-weight: 700;">"${escapeHtml(query)}"</span>
+                        </div>
+                        <div style="font-size: 12px; color: #8b949e;">
+                            Click <strong style="color: #58a6ff;">Details</strong> for full popup or <strong style="color: #c9d1d9;">Hero View</strong> for hero profile
+                        </div>
+                    </div>
+                    <div class="student-grid" id="singleNameGrid">
+            `;
+
+            matches.forEach(item => {
+                const roll = item.rollNumber;
+                const student = item.student || {};
+                const photoUrl = `https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${roll}.jpg`;
+                const branch = student.branch || 'MLRITM';
+                const name = student.name || 'Unknown Student';
+                const phone = student.phone || '';
+                const caste = (student.caste && student.caste.trim()) ? student.caste.trim() : '';
+
+                html += `
+                    <div class="student-card" data-roll="${roll}">
+                        <div class="student-img-wrap is-loading">
+                            <img src="${photoUrl}" alt="${roll}" class="student-img pending" decoding="async" loading="lazy">
+                        </div>
+                        <div class="student-roll">${roll}</div>
+                        <div class="student-name" style="font-size: 13px; font-weight: 600; color: #ffb74d; text-align: center; margin: 4px 0 6px; line-height: 1.3;">${escapeHtml(name)}</div>
+                        <div class="student-badge" style="margin-bottom: 6px; font-size: 10px;">${escapeHtml(branch)}</div>
+                        ${phone ? `<div style="font-size: 11px; color: #7ee787; margin-bottom: 4px;">📱 <a href="tel:${phone}" style="color: #7ee787; text-decoration: none;">${phone}</a></div>` : ''}
+                        ${caste ? `<div style="font-size: 10px; color: #79c0ff; margin-bottom: 6px;"><span style="background: #21262d; border: 1px solid #30363d; padding: 1px 6px; border-radius: 4px;">${escapeHtml(caste)}</span></div>` : ''}
+                        <div class="student-actions" style="margin-top: 8px;">
+                            <button class="btn-card primary" onclick="openModalForRoll('${roll}')">Details</button>
+                            <button class="btn-card" onclick="renderSingleHeroFromRoll('${roll}')">Hero View</button>
+                            <a href="${photoUrl}" target="_blank" class="btn-card">Photo</a>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            window._lastSearchResultsHtml = html;
+
+            // Attach photo reveals for smooth loading
+            const grid = document.getElementById('singleNameGrid');
+            if (grid) {
+                grid.querySelectorAll('.student-card').forEach(card => attachPhotoReveal(card));
+            }
+        }
+
+        function renderSingleHeroFromRoll(roll) {
+            renderSingleProfileCard(roll, `Viewing profile for ${roll}`);
+        }
+
+        function restoreNameSearchResults() {
+            if (window._lastSearchResultsHtml) {
+                const container = document.getElementById('singleResultContainer');
+                if (container) {
+                    container.innerHTML = window._lastSearchResultsHtml;
+                    const grid = document.getElementById('singleNameGrid');
+                    if (grid) {
+                        grid.querySelectorAll('.student-card').forEach(card => attachPhotoReveal(card));
+                    }
+                }
+            }
+        }
+
+        // Search single student (Supports Roll Number, Mobile Number, Student Name, or Instagram Handle)
+        function searchSingleStudent() {
+            const rawInput = document.getElementById('singleRollInput').value.trim();
+            if (!rawInput) {
+                alert('Please enter a roll number, mobile number, or student name.');
+                return;
+            }
+
+            const mode = currentSingleSearchMode || 'auto';
+            const cleanDigits = rawInput.replace(/\D/g, '');
+            const upperInput = rawInput.toUpperCase();
+            const container = document.getElementById('singleResultContainer');
+
+            // --- Explicit NAME mode ---
+            if (mode === 'name') {
+                if (typeof window.getStudentsByName === 'function') {
+                    const matches = window.getStudentsByName(rawInput, 80);
+                    if (matches.length === 0) {
+                        container.innerHTML = `
+                            <div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; text-align: center; max-width: 600px; margin: 20px auto;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                                <h3 style="color: #f85149; font-size: 16px; margin-bottom: 8px;">No Student Found</h3>
+                                <p style="color: #8b949e; font-size: 13px;">No student found matching name "${escapeHtml(rawInput)}".</p>
+                                <p style="color: #6e7681; font-size: 12px; margin-top: 6px;">Tip: Check spelling or try searching with first name or last name.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    if (matches.length === 1) {
+                        renderSingleProfileCard(matches[0].rollNumber, `Found 1 exact match for "${matches[0].student.name}"`);
+                        return;
+                    }
+                    renderNameSearchResults(matches, rawInput);
+                    return;
+                }
+            }
+
+            // --- Explicit MOBILE mode ---
+            if (mode === 'mobile') {
+                if (cleanDigits.length < 10) {
+                    alert('Please enter a valid 10-digit mobile number.');
+                    return;
+                }
+                const phoneMatch = typeof window.getStudentByPhone === 'function' ? window.getStudentByPhone(cleanDigits) : null;
+                if (phoneMatch) {
+                    renderSingleProfileCard(phoneMatch.rollNumber, `Matched via phone: ${phoneMatch.matchedPhone}`);
+                } else {
+                    container.innerHTML = `
+                        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; text-align: center; max-width: 600px; margin: 20px auto;">
+                            <div style="font-size: 32px; margin-bottom: 8px;">📱</div>
+                            <h3 style="color: #f85149; font-size: 16px; margin-bottom: 8px;">Mobile Number Not Found</h3>
+                            <p style="color: #8b949e; font-size: 13px;">No enrolled student found registered with mobile "${escapeHtml(cleanDigits)}".</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            // --- Explicit ROLL mode ---
+            if (mode === 'roll') {
+                const db = (typeof window !== 'undefined' && window.MLRITM_STUDENTS) ? window.MLRITM_STUDENTS[upperInput] : null;
+                const isRollPattern = /^[0-9]{2}7Y[0-9A-Z]{6}$/i.test(upperInput);
+                if (db || isRollPattern) {
+                    renderSingleProfileCard(upperInput);
+                } else {
+                    container.innerHTML = `
+                        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; text-align: center; max-width: 600px; margin: 20px auto;">
+                            <div style="font-size: 32px; margin-bottom: 8px;">🆔</div>
+                            <h3 style="color: #f85149; font-size: 16px; margin-bottom: 8px;">Roll Number Not Found</h3>
+                            <p style="color: #8b949e; font-size: 13px;">No student record found with roll number "${escapeHtml(upperInput)}".</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            // --- AUTO-DETECT mode ---
+            // 1. Check if user entered a 10-digit mobile number
+            if (cleanDigits.length >= 10 && typeof window.getStudentByPhone === 'function') {
+                const phoneMatch = window.getStudentByPhone(cleanDigits);
+                if (phoneMatch) {
+                    renderSingleProfileCard(phoneMatch.rollNumber, `Matched via phone: ${phoneMatch.matchedPhone}`);
+                    return;
+                }
+            }
+
+            // 2. Check if user entered an exact roll number or valid roll pattern
+            const dbMatch = (typeof window !== 'undefined' && window.MLRITM_STUDENTS) ? window.MLRITM_STUDENTS[upperInput] : null;
+            const isStandardRoll = /^[0-9]{2}7Y[0-9A-Z]{6}$/i.test(upperInput);
+            if (dbMatch || isStandardRoll) {
+                renderSingleProfileCard(upperInput);
+                return;
+            }
+
+            // 3. Check if user entered an Instagram handle (@username)
+            if (rawInput.startsWith('@') && typeof window.getStudentByInstagram === 'function') {
+                const igMatch = window.getStudentByInstagram(rawInput);
+                if (igMatch) {
+                    renderSingleProfileCard(igMatch.rollNumber, `Matched via Instagram: @${igMatch.instagram?.username || rawInput}`);
+                    return;
+                }
+            }
+
+            // 4. Default in Auto-Detect: treat as Student Name Search!
+            if (typeof window.getStudentsByName === 'function') {
+                const matches = window.getStudentsByName(rawInput, 80);
+                if (matches.length === 1) {
+                    renderSingleProfileCard(matches[0].rollNumber, `Found 1 exact match for name: ${matches[0].student.name}`);
+                    return;
+                }
+                if (matches.length > 1) {
+                    renderNameSearchResults(matches, rawInput);
+                    return;
+                }
+            }
+
+            // If not found anywhere
+            let notFoundTitle = 'No Student Found';
+            let notFoundDesc = `No student found matching "${escapeHtml(rawInput)}".`;
+            if (upperInput.includes('7Y')) {
+                notFoundDesc = `Roll number "${escapeHtml(upperInput)}" was not found in the student database.`;
+            } else if (cleanDigits.length === 10) {
+                notFoundDesc = `Mobile number "${escapeHtml(cleanDigits)}" was not found in registered records.`;
+            } else {
+                notFoundDesc = `No student found with name or ID "${escapeHtml(rawInput)}". Try searching by partial name, Roll Number, or 10-digit Mobile Number.`;
+            }
+
+            container.innerHTML = `
+                <div style="background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; text-align: center; max-width: 600px; margin: 20px auto;">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                    <h3 style="color: #f85149; font-size: 16px; margin-bottom: 8px;">${notFoundTitle}</h3>
+                    <p style="color: #8b949e; font-size: 13px;">${notFoundDesc}</p>
+                    <p style="color: #6e7681; font-size: 12px; margin-top: 6px;">Tip: Check spelling, or click the mode buttons above to search specifically by Name, Roll, or Mobile.</p>
+                </div>
+            `;
+        }
+
+        // Roll suffix helpers. MLRITM/JNTU suffixes run 01..99, then A0..A9, B0..B9, ...
+        // (2nd char is always a digit), so we map them to a dense index instead of
+        // walking every base-36 value (e.g. 0A..0Z), which wasted ~70% of requests.
+        let rangeRunId = 0;
+        let branchRunId = 0;
+
+        function rollSuffixToIndex(suffix) {
+            if (!/^[0-9A-Z][0-9]$/.test(suffix)) return NaN;
+            const head = suffix.charCodeAt(0);
+            const lead = head <= 57 ? head - 48 : head - 55; // '0'-'9' -> 0-9, 'A'-'Z' -> 10-35
+            return lead * 10 + (suffix.charCodeAt(1) - 48);
+        }
+
+        function indexToRollSuffix(index) {
+            const lead = Math.floor(index / 10);
+            return (lead < 10 ? String(lead) : String.fromCharCode(55 + lead)) + (index % 10);
         }
 
         // Generate Range
@@ -1068,8 +1663,11 @@
             const startAlphanumeric = startRoll.slice(8);
             const endAlphanumeric = endRoll.slice(8);
 
-            const startNum = parseInt(startAlphanumeric, 36);
-            const endNum = parseInt(endAlphanumeric, 36);
+            const fastStart = rollSuffixToIndex(startAlphanumeric);
+            const fastEnd = rollSuffixToIndex(endAlphanumeric);
+            const useFast = !isNaN(fastStart) && !isNaN(fastEnd);
+            const startNum = useFast ? fastStart : parseInt(startAlphanumeric, 36);
+            const endNum = useFast ? fastEnd : parseInt(endAlphanumeric, 36);
 
             if (isNaN(startNum) || isNaN(endNum) || startNum > endNum) {
                 alert('Invalid roll number range.');
@@ -1085,45 +1683,89 @@
             spinner.style.display = 'block';
             status.textContent = 'Fetching student images...';
 
+            const runId = ++rangeRunId; // newer searches supersede older ones
+            branchRunId++; // stop any branch photo scan still running
             let loadedCount = 0;
+            countDisplay.textContent = 'Total: 0';
             const promises = [];
 
             for (let i = startNum; i <= endNum; i++) {
-                const rollSuffix = i.toString(36).toUpperCase().padStart(startAlphanumeric.length, '0');
+                const rollSuffix = useFast
+                    ? indexToRollSuffix(i)
+                    : i.toString(36).toUpperCase().padStart(startAlphanumeric.length, '0');
                 const roll = prefix + rollSuffix;
                 const info = decodeRoll(roll);
 
-                const img = new Image();
-                img.src = info.photoUrl;
-                img.alt = roll;
-
-                const p = new Promise(resolve => {
-                    img.onload = () => resolve({ info, img });
-                    img.onerror = () => resolve(null);
-                });
-                promises.push(p);
-            }
-
-            for (const p of promises) {
-                const res = await p;
-                if (res) {
+                // Card is inserted hidden (keeps roll order) and revealed the moment its photo loads.
+                const card = renderStudentCard(info, { hidden: true });
+                promises.push(trackPhoto(card, () => runId === rangeRunId, () => {
                     loadedCount++;
                     countDisplay.textContent = `Total: ${loadedCount}`;
-                    renderStudentCard(res.info);
-                }
+                }));
             }
+
+            await Promise.all(promises);
+            if (runId !== rangeRunId) return;
 
             spinner.style.display = 'none';
             status.textContent = `Completed! ${loadedCount} student photos found.`;
         }
 
-        function renderStudentCard(info) {
+        // Resolves true/false once a (hidden) card's photo loads or fails; reveals or removes the card.
+        function trackPhoto(card, isCurrent, onFound) {
+            const img = card.querySelector('.student-img');
+            return new Promise(resolve => {
+                let settled = false;
+                const done = ok => {
+                    if (settled) return;
+                    settled = true;
+                    if (isCurrent()) {
+                        if (ok) {
+                            card.style.display = '';
+                            onFound();
+                        } else {
+                            card.remove();
+                        }
+                    }
+                    resolve(ok);
+                };
+                img.addEventListener('load', () => done(true));
+                img.addEventListener('error', () => done(false));
+                if (img.complete) done(img.naturalWidth > 0);
+            });
+        }
+
+        // Shimmer until the photo is fully downloaded AND decoded, then fade it in (no half-painted photos).
+        function attachPhotoReveal(card) {
+            const img = card.querySelector('.student-img');
+            const wrap = img.parentElement;
+            const show = () => {
+                img.classList.remove('pending');
+                wrap.classList.remove('is-loading');
+            };
+            const fail = () => {
+                wrap.classList.remove('is-loading');
+                wrap.classList.add('no-photo');
+                img.style.display = 'none';
+            };
+            img.addEventListener('load', () => {
+                (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(show);
+            });
+            img.addEventListener('error', fail);
+            if (img.complete) {
+                if (img.naturalWidth > 0) show(); else fail();
+            }
+        }
+
+        // opts: { hidden, lazy, highPriority }
+        function renderStudentCard(info, opts = {}) {
             const grid = document.getElementById('studentGrid');
             const card = document.createElement('div');
             card.className = 'student-card';
+            if (opts.hidden) card.style.display = 'none';
             card.innerHTML = `
-                <div class="student-img-wrap">
-                    <img src="${info.photoUrl}" alt="${info.rollNumber}" class="student-img">
+                <div class="student-img-wrap is-loading">
+                    <img src="${info.photoUrl}" alt="${info.rollNumber}" class="student-img pending" decoding="async" loading="${opts.lazy ? 'lazy' : 'eager'}" fetchpriority="${opts.highPriority ? 'high' : 'auto'}">
                 </div>
                 <div class="student-roll">${info.rollNumber}</div>
                 ${info.name ? `<div class="student-name">${info.name}</div>` : ''}
@@ -1134,21 +1776,115 @@
                 </div>
             `;
             grid.appendChild(card);
+            attachPhotoReveal(card);
+            return card;
+        }
+
+        // ==================== Quick Branch Browser (database-driven + gender filter) ====================
+        let branchLoaded = false;
+
+        function getSelectedGender() {
+            const el = document.querySelector('input[name="branchGender"]:checked');
+            return el ? el.value : 'all';
+        }
+
+        function compareRolls(a, b) {
+            const pa = a.slice(0, 8), pb = b.slice(0, 8);
+            if (pa !== pb) return pa < pb ? -1 : 1;
+            const ia = rollSuffixToIndex(a.slice(8)), ib = rollSuffixToIndex(b.slice(8));
+            if (isNaN(ia) || isNaN(ib)) return a < b ? -1 : (a > b ? 1 : 0);
+            return ia - ib;
+        }
+
+        function setGenderCounts(all, male, female) {
+            const fmt = n => (n === null ? '' : `(${n})`);
+            document.getElementById('genderCountAll').textContent = fmt(all);
+            document.getElementById('genderCountMale').textContent = fmt(male);
+            document.getElementById('genderCountFemale').textContent = fmt(female);
+        }
+
+        function onGenderChange() {
+            // Re-filter instantly once a class has been loaded (photos already cached by the browser)
+            if (branchLoaded) loadSelectedSection();
         }
 
         function loadSelectedSection() {
-            const year = document.getElementById('branchYear').value;
+            const year = parseInt(document.getElementById('branchYear').value, 10);
             const dept = document.getElementById('branchDept').value;
-            const section = document.getElementById('branchSection').value;
-            const [startSuffix, endSuffix] = section.split('-');
+            const gender = getSelectedGender();
+            const regularPrefix = `${year}7Y1A${dept}`;
+            const lateralPrefix = `${year + 1}7Y5A${dept}`; // lateral-entry classmates join in 2nd year
+            const status = document.getElementById('branchStatus');
+            const countDisplay = document.getElementById('branchCount');
 
-            const prefix = `${year}7Y1A${dept}`;
-            document.getElementById('rangeStart').value = `${prefix}${startSuffix}`;
-            document.getElementById('rangeEnd').value = `${prefix}${endSuffix}`;
+            const runId = ++branchRunId;
+            rangeRunId++; // cancel any range search still running
+            branchLoaded = true;
+            document.getElementById('studentGrid').innerHTML = '';
+            document.getElementById('gallerySpinner').style.display = 'none';
 
-            switchTab('range');
-            document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            generateRange();
+            const db = window.MLRITM_STUDENTS || {};
+            const classRolls = Object.keys(db)
+                .filter(r => r.startsWith(regularPrefix) || r.startsWith(lateralPrefix))
+                .sort(compareRolls);
+
+            if (classRolls.length === 0) {
+                setGenderCounts(null, null, null);
+                probeBranchPhotos(regularPrefix, runId, gender !== 'all');
+                return;
+            }
+
+            const males = classRolls.filter(r => db[r].gender === 'Male');
+            const females = classRolls.filter(r => db[r].gender === 'Female');
+            setGenderCounts(classRolls.length, males.length, females.length);
+
+            const rolls = gender === 'Male' ? males : (gender === 'Female' ? females : classRolls);
+            const label = gender === 'all' ? 'students' : `${gender.toLowerCase()} students`;
+
+            // Cards appear instantly from the database; the first rows get top download priority
+            // and off-screen photos load lazily so visible photos are not queued behind them.
+            rolls.forEach((roll, i) => {
+                renderStudentCard(decodeRoll(roll), { lazy: i >= 12, highPriority: i < 8 });
+            });
+
+            countDisplay.textContent = `Total: ${rolls.length}`;
+            status.textContent = rolls.length
+                ? `Showing ${rolls.length} ${label} (${regularPrefix}xx${classRolls.some(r => r.startsWith(lateralPrefix)) ? ' + lateral entry' : ''}).`
+                : `No ${label} found for ${regularPrefix}.`;
+        }
+
+        // Fallback for batches not in the database: scan roll numbers in batches and stop
+        // as soon as a whole batch has no photos (end of class reached).
+        async function probeBranchPhotos(prefix, runId, genderRequested) {
+            const status = document.getElementById('branchStatus');
+            const countDisplay = document.getElementById('branchCount');
+            const spinner = document.getElementById('gallerySpinner');
+            const BATCH = 40, MAX_INDEX = 359; // suffixes 01 .. Z9
+            let found = 0;
+
+            spinner.style.display = 'block';
+            countDisplay.textContent = 'Total: 0';
+            status.textContent = genderRequested
+                ? 'Gender details are not available for this batch yet - showing all photos found...'
+                : 'Scanning for class photos...';
+
+            for (let start = 1; start <= MAX_INDEX; start += BATCH) {
+                const end = Math.min(start + BATCH - 1, MAX_INDEX);
+                const checks = [];
+                for (let i = start; i <= end; i++) {
+                    const card = renderStudentCard(decodeRoll(prefix + indexToRollSuffix(i)), { hidden: true });
+                    checks.push(trackPhoto(card, () => runId === branchRunId, () => {
+                        found++;
+                        countDisplay.textContent = `Total: ${found}`;
+                    }));
+                }
+                const hits = (await Promise.all(checks)).filter(Boolean).length;
+                if (runId !== branchRunId) return;
+                if (hits === 0) break;
+            }
+
+            spinner.style.display = 'none';
+            status.textContent = `${genderRequested ? 'Gender filter unavailable for this batch. ' : ''}Found ${found} student photos for ${prefix}xx.`;
         }
 
         function extractFromHtml() {
@@ -1191,7 +1927,7 @@
                     <div style="margin-top: 16px; padding: 16px; background: #0d1117; border: 1px solid #238636; border-radius: 8px;">
                         <span style="color: #2ea043; font-weight: bold;">✔ Extracted Student Profile:</span>
                         <div style="display: flex; gap: 16px; align-items: center; margin-top: 12px;">
-                            <img src="${info.photoUrl}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #58a6ff;">
+                            <img src="${info.photoUrl}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; border: 2px solid #58a6ff;">
                             <div>
                                 <div style="font-size: 16px; font-weight: bold; color: #58a6ff;">${info.rollNumber}</div>
                                 ${info.name ? `<div style="color: #ffb74d; font-weight: 600;">${info.name}</div>` : ''}
@@ -1213,27 +1949,30 @@
             const addr = info.address;
             document.getElementById('modalContent').innerHTML = `
                 <div style="text-align: center;">
-                    <img src="${info.photoUrl}" style="width: 130px; height: 130px; border-radius: 50%; border: 3px solid #58a6ff; object-fit: cover; margin-bottom: 12px;">
-                    <h2 style="font-size: 20px; color: #58a6ff;">${info.rollNumber}</h2>
-                    ${info.name ? `<div style="font-size: 16px; font-weight: bold; color: #ffb74d; margin-bottom: 8px;">${info.name}</div>` : ''}
-                    <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; text-align: left; margin: 16px 0; font-size: 13px;">
+                    <img src="${info.photoUrl}" alt="${info.rollNumber}" style="width: 120px; height: 120px; border-radius: 12px; border: 3px solid #58a6ff; object-fit: cover; margin-bottom: 10px; background: #0d1117;" onerror="this.onerror=null; this.src='https://via.placeholder.com/120/161b22/58a6ff?text=No+Photo';">
+                    <h2 style="font-size: 20px; color: #58a6ff; margin-bottom: 3px;">${info.rollNumber}</h2>
+                    ${info.name ? `<div style="font-size: 15px; font-weight: bold; color: #ffb74d; margin-bottom: 12px;">${info.name}</div>` : ''}
+                    <div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 14px; text-align: left; margin: 12px 0 16px; font-size: 13px; line-height: 1.5;">
                         <p style="margin-bottom: 6px;"><strong>College:</strong> ${info.college}</p>
                         ${info.phone ? `<p style="margin-bottom: 6px;"><strong>Mobile:</strong> <a href="tel:${info.phone}" style="color: #58a6ff; text-decoration: none;">${info.phone}</a></p>` : ''}
-                        ${info.father ? `<p style="margin-bottom: 6px;"><strong>Father:</strong> ${info.father}</p>` : ''}
+                        ${info.father ? `<p style="margin-bottom: 6px;"><strong>Father:</strong> ${info.father} ${info.father_phone ? '(' + info.father_phone + ')' : ''}</p>` : ''}
                         ${info.mother ? `<p style="margin-bottom: 6px;"><strong>Mother:</strong> ${info.mother}</p>` : ''}
                         ${info.dob ? `<p style="margin-bottom: 6px;"><strong>DOB:</strong> ${info.dob} ${info.gender ? '(' + info.gender + ')' : ''}</p>` : ''}
                         <p style="margin-bottom: 6px;"><strong>Branch:</strong> ${info.branch}</p>
                         <p style="margin-bottom: 6px;"><strong>Batch:</strong> ${info.batch}</p>
                         <p style="margin-bottom: 6px;"><strong>Course:</strong> ${info.course}</p>
                         <p style="margin-bottom: 6px;"><strong>Email:</strong> <a href="mailto:${info.email}" style="color: #58a6ff;">${info.email}</a></p>
+                        ${info.caste ? `<p style="margin-bottom: 6px;"><strong>Caste / Community:</strong> <span style="background: #21262d; border: 1px solid #30363d; padding: 2px 8px; border-radius: 4px; color: #79c0ff; font-weight: 600;">${info.caste}</span></p>` : ''}
+                        ${info.admissionCategory ? `<p style="margin-bottom: 6px;"><strong>Admission Category:</strong> <span style="background: #21262d; border: 1px solid #30363d; padding: 2px 8px; border-radius: 4px; color: #7ee787; font-weight: 500;">${info.admissionCategory}</span></p>` : ''}
 
                         ${renderInstagramBlock(info)}
                         ${renderAddressBlock(info)}
                     </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding-top: 10px; border-top: 1px solid #21262d;">
                         <a href="${info.photoUrl}" target="_blank" class="btn-card primary" style="padding: 8px 14px; font-size: 13px;">View Full Image</a>
                         <button class="btn-card" onclick="navigator.clipboard.writeText('${info.email}'); alert('Email copied!');" style="padding: 8px 14px; font-size: 13px;">Copy Email</button>
                         ${info.phone ? `<a href="tel:${info.phone}" class="btn-card" style="padding: 8px 14px; font-size: 13px; text-decoration:none;">Call Student</a>` : ''}
+                        <button class="btn-card" onclick="if(typeof openErpMenu==='function'){openErpMenu('${info.rollNumber}')}else{window.open('https://anvaya.mlritm.ac.in/App','_blank')}" style="background:#238636; border-color:#2ea043; color:#fff; padding:8px 14px; font-size:13px; font-weight:600;">🏛️ ERP Portal</button>
                     </div>
                 </div>
             `;
@@ -1636,6 +2375,185 @@
             if (!window.ErpRouteRegistry) return;
             window.ErpRouteRegistry.openService(serviceId);
         }
+
+        // Attendance Tracker Handlers
+        function runAttendanceCalc() {
+            const total = parseInt(document.getElementById('attTotalClasses')?.value, 10) || 0;
+            const attended = parseInt(document.getElementById('attAttendedClasses')?.value, 10) || 0;
+            const target = parseInt(document.getElementById('attTargetPct')?.value, 10) || 75;
+            const box = document.getElementById('attCalcResultBox');
+            if (!box) return;
+
+            if (typeof window.MLRITM_ATTENDANCE === 'undefined' || typeof window.MLRITM_ATTENDANCE.calculateAnalytics !== 'function') {
+                return;
+            }
+
+            const res = window.MLRITM_ATTENDANCE.calculateAnalytics(attended, total, target);
+
+            box.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div>
+                        <span style="font-size:24px; font-weight:800; color:${res.statusColor};">${res.currentPercentage}%</span>
+                        <span style="font-size:12px; color:#8b949e; margin-left:6px;">(${attended} / ${total} classes)</span>
+                    </div>
+                    <span style="background:#21262d; border:1px solid #30363d; color:${res.statusColor}; font-weight:600; font-size:11px; padding:3px 10px; border-radius:12px;">
+                        ${res.status}
+                    </span>
+                </div>
+                <div style="font-size:13px; line-height:1.5; color:#c9d1d9;">
+                    ${res.canBunk > 0 ? `
+                        <div style="color:#7ee787;">
+                            ✔ <strong>Safe Margin:</strong> You can safely miss up to <strong>${res.canBunk}</strong> more class${res.canBunk > 1 ? 'es' : ''} and still maintain &ge;${target}%.
+                        </div>
+                    ` : (res.mustAttend > 0 ? `
+                        <div style="color:#ff7b72;">
+                            ⚠ <strong>Catch-Up Required:</strong> You must attend the next <strong>${res.mustAttend}</strong> consecutive class${res.mustAttend > 1 ? 'es' : ''} without absence to reach ${target}%.
+                        </div>
+                    ` : `
+                        <div style="color:#e3b341;">
+                            You are exactly at your target threshold (${target}%). Any absence will reduce your attendance below ${target}%.
+                        </div>
+                    `)}
+                    ${res.needsCondonation ? `
+                        <div style="margin-top:6px; font-size:11px; color:#e3b341; background:#21262d; padding:6px 10px; border-radius:4px; border:1px solid #30363d;">
+                            📌 <strong>Condonation Rule:</strong> Attendance between 65% and 74.99% requires formal condonation approval and payment via MLRITM Accounts.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function parseAndDisplayAttendance() {
+            const input = document.getElementById('beesRawInput')?.value.trim();
+            if (!input) {
+                alert('Please paste BeesERP daywise attendance data first, or click "Load Sample Data".');
+                return;
+            }
+
+            if (typeof window.MLRITM_ATTENDANCE === 'undefined' || typeof window.MLRITM_ATTENDANCE.parseBeesAttendance !== 'function') {
+                alert('Attendance module is initializing, please try again.');
+                return;
+            }
+
+            const parsed = window.MLRITM_ATTENDANCE.parseBeesAttendance(input);
+            if (!parsed || parsed.days.length === 0) {
+                alert('Could not find daywise date records matching format (e.g. 14/10/2026(Wed) P P A P P). Please check input.');
+                return;
+            }
+
+            // Sync calculator inputs
+            if (document.getElementById('attTotalClasses')) document.getElementById('attTotalClasses').value = parsed.totalPeriods;
+            if (document.getElementById('attAttendedClasses')) document.getElementById('attAttendedClasses').value = parsed.totalPresents;
+            runAttendanceCalc();
+
+            // Absent today alert banner
+            const alertBox = document.getElementById('attendanceAbsentAlert');
+            if (parsed.isAbsentToday) {
+                alertBox.style.display = 'block';
+                alertBox.innerHTML = `
+                    <div style="background: rgba(248, 81, 73, 0.15); border: 1px solid #f85149; border-radius: 8px; padding: 14px 18px; color: #ff7b72; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <strong style="font-size: 14px;">⚠️ Notification: Absent Marked For Today!</strong>
+                            <div style="font-size: 12px; margin-top: 3px; color: #c9d1d9;">
+                                BeesERP log indicates one or more absent periods ('A') recorded today (${parsed.todayRecord ? parsed.todayRecord.date : 'Today'}). Please verify with your department coordinator.
+                            </div>
+                        </div>
+                        <span style="background: #da3633; color: #fff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 4px;">ABSENT TODAY</span>
+                    </div>
+                `;
+            } else {
+                alertBox.style.display = 'none';
+            }
+
+            // Render Table
+            const container = document.getElementById('daywiseTableContainer');
+            const table = document.getElementById('daywiseGridTable');
+            const summary = document.getElementById('daywiseSummaryStats');
+
+            container.style.display = 'block';
+            summary.innerHTML = `
+                <span>Total Days: <strong>${parsed.days.length}</strong></span>
+                <span style="color:#7ee787;">Present: <strong>${parsed.totalPresents}</strong></span>
+                <span style="color:#ff7b72;">Absent: <strong>${parsed.totalAbsents}</strong></span>
+                <span style="color:#58a6ff;">Total: <strong>${parsed.totalPercentage}%</strong></span>
+            `;
+
+            let tableHtml = `
+                <thead>
+                    <tr style="background:#21262d; color:#8b949e; border-bottom:1px solid #30363d;">
+                        <th style="padding:10px; text-align:left;">Date & Day</th>
+                        <th style="padding:10px;">Period 1</th>
+                        <th style="padding:10px;">Period 2</th>
+                        <th style="padding:10px;">Period 3</th>
+                        <th style="padding:10px;">Period 4</th>
+                        <th style="padding:10px;">Period 5</th>
+                        <th style="padding:10px;">Period 6</th>
+                        <th style="padding:10px;">Period 7</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            parsed.days.forEach(d => {
+                tableHtml += `<tr style="border-bottom:1px solid #21262d;">
+                    <td style="padding:10px; text-align:left; font-weight:600; color:#e6edf3;">${d.date}</td>
+                `;
+                for (let p = 0; p < 7; p++) {
+                    const status = d.periods[p] || '-';
+                    let badge = `<span style="color:#6e7681;">-</span>`;
+                    if (status === 'P' || status === 'OD') {
+                        badge = `<span style="background:#238636; color:#fff; font-size:11px; font-weight:bold; padding:2px 8px; border-radius:4px;">P</span>`;
+                    } else if (status === 'A') {
+                        badge = `<span style="background:#da3633; color:#fff; font-size:11px; font-weight:bold; padding:2px 8px; border-radius:4px;">A</span>`;
+                    }
+                    tableHtml += `<td style="padding:10px;">${badge}</td>`;
+                }
+                tableHtml += `</tr>`;
+            });
+
+            tableHtml += `</tbody>`;
+            table.innerHTML = tableHtml;
+        }
+
+        function loadSampleAttendanceData() {
+            const today = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const d1 = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}(${today.toLocaleDateString('en-US', {weekday:'short'})})`;
+            
+            const prev1 = new Date(today); prev1.setDate(today.getDate() - 1);
+            const d2 = `${prev1.getDate()}/${prev1.getMonth() + 1}/${prev1.getFullYear()}(${prev1.toLocaleDateString('en-US', {weekday:'short'})})`;
+
+            const prev2 = new Date(today); prev2.setDate(today.getDate() - 2);
+            const d3 = `${prev2.getDate()}/${prev2.getMonth() + 1}/${prev2.getFullYear()}(${prev2.toLocaleDateString('en-US', {weekday:'short'})})`;
+
+            const sample = `Total Percentage: 76.5%
+${d1} P P A P P P P
+${d2} P P P P P P P
+${d3} P P P A P P P
+10/10/2026(Sat) P P P P P P P
+09/10/2026(Fri) P P P P P P P
+08/10/2026(Thu) P A P P P P P
+07/10/2026(Wed) P P P P P P P`;
+
+            const input = document.getElementById('beesRawInput');
+            if (input) {
+                input.value = sample;
+                parseAndDisplayAttendance();
+            }
+        }
+
+        function clearAttendanceInput() {
+            const input = document.getElementById('beesRawInput');
+            if (input) input.value = '';
+            const container = document.getElementById('daywiseTableContainer');
+            if (container) container.style.display = 'none';
+            const alertBox = document.getElementById('attendanceAbsentAlert');
+            if (alertBox) alertBox.style.display = 'none';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            runAttendanceCalc();
+        });
     </script>
 </body>
 </html>

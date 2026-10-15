@@ -253,9 +253,10 @@ function appendAdditionalLinks(container, rollNumber) {
                     ${details.father_phone ? `<div style="font-size:12px; margin-top:4px;"><strong>Father Contact:</strong> <a href="tel:${details.father_phone}" style="color:#64b5f6; text-decoration:none;">${details.father_phone}</a></div>` : ''}
                 </div>
 
-                <div style="margin-top:8px; display:flex; gap:8px;">
+                <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
                     <a href="https://anvaya.mlritm.ac.in/Docs/MLRITM/User/${details.rollNumber}.jpg" target="_blank" style="padding:4px 10px; background:#007bff; color:#fff; border-radius:4px; text-decoration:none; font-size:12px;">Full Photo</a>
                     <button type="button" onclick="navigator.clipboard.writeText('${details.email}'); alert('Email copied!');" style="padding:4px 10px; background:#333; color:#eee; border:1px solid #666; border-radius:4px; cursor:pointer; font-size:12px;">Copy Email</button>
+                    <button type="button" onclick="if(typeof openErpMenu==='function'){openErpMenu('${details.rollNumber}')}else{window.open('https://anvaya.mlritm.ac.in/App','_blank')}" style="padding:4px 10px; background:#238636; color:#fff; border:1px solid #2ea043; border-radius:4px; cursor:pointer; font-size:12px; font-weight:600;">🏛️ ERP Portal</button>
                 </div>
             </div>
         `;
